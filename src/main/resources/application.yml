@@ -1,6 +1,8 @@
 app:
   server:
     port: 8080
+  wx:
+    token: codertostar
   turing:
     userId: ligson
     apiKey: f835f4c0880c4ec5bc8eab730ad579c0

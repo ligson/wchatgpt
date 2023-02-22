@@ -7,4 +7,5 @@ public class AppVo {
     private TuringConfig turing;
     private OpenAIConfig openai;
     private ServerVo server;
+    private WXVo wx;
 }

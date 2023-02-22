@@ -82,7 +82,7 @@ public class AuthHandler implements HttpHandler {
         String timestamp = param.get("timestamp");
         String nonce = param.get("nonce");
         String openid = param.get("openid");
-        String token = "codertostar";
+        String token = appConfig.getApp().getWx().getToken();
 
 
         String[] arr = new String[]{token, timestamp, nonce};
@@ -128,7 +128,7 @@ public class AuthHandler implements HttpHandler {
                             "<FromUserName><![CDATA[" + ToUserName + "]]></FromUserName>" +
                             "<CreateTime>" + System.currentTimeMillis() + "</CreateTime>" +
                             "<MsgType><![CDATA[text]]></MsgType>" +
-                            "<Content><![CDATA["+con+"]]></Content>" +
+                            "<Content><![CDATA[" + con + "]]></Content>" +
                             "</xml>";
                     byte[] replyBuf = reply.getBytes();
                     exchange.sendResponseHeaders(200, replyBuf.length);
@@ -143,8 +143,6 @@ public class AuthHandler implements HttpHandler {
                 exchange.sendResponseHeaders(200, 0);
             }
         }
-
-
         exchange.close();
     }
 }
