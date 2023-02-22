@@ -1,4 +1,4 @@
-package org.ligson.turing.vo;
+package org.ligson.turing.vo.res;
 
 import lombok.Data;
 

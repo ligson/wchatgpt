@@ -1,6 +1,7 @@
-package org.ligson.vo;
+package org.ligson.openai.vo;
 
 import lombok.Data;
+import org.ligson.openai.vo.Model;
 
 import java.util.ArrayList;
 import java.util.List;

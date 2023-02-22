@@ -1,4 +1,4 @@
-package org.ligson.vo;
+package org.ligson.openai.vo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

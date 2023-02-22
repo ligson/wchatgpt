@@ -1,2 +1,9 @@
-package org.ligson.vo;public class ServerVo {
+package org.ligson.vo;
+
+import lombok.Data;
+
+@Data
+public class ServerVo {
+    private int port;
+
 }

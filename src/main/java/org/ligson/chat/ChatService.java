@@ -1,2 +1,5 @@
-package org.ligson.chat;public class ChatService {
+package org.ligson.chat;
+
+public interface ChatService {
+    String chat(String question);
 }

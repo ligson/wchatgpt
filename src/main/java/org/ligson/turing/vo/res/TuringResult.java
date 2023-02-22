@@ -1,4 +1,4 @@
-package org.ligson.turing.vo;
+package org.ligson.turing.vo.res;
 
 import lombok.Data;
 
@@ -8,6 +8,6 @@ import java.util.List;
 @Data
 public class TuringResult {
     private Intent intent;
-    private List<Results> results = new ArrayList<>();
+    private List<Result> results = new ArrayList<>();
 
 }

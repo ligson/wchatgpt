@@ -1,4 +1,4 @@
-package org.ligson.turing;
+package org.ligson.turing.vo.req;
 
 import lombok.Data;
 

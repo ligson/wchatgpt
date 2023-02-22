@@ -1,4 +1,4 @@
-package org.ligson.turing.vo;
+package org.ligson.turing.vo.res;
 
 import lombok.Data;
 
@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class Results {
+public class Result {
     private int groupType;
     private String resultType;
-    private List<ResultValue> values = new ArrayList<>();
+    private ResultValue values;
 }
