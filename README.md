@@ -35,6 +35,8 @@ services:
     #   api_key: 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
     #   wechat: true
     #   wechat_keyword: tmd
+    ports:
+      - "18080:8080"
     volumes:
       - ./data/conf:/app/wchatgpt/conf
       - ./data/logs:/app/wchatgpt/logs
