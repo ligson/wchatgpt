@@ -66,7 +66,7 @@ public class AuthHandler implements HttpHandler {
                 content = openAIChatService.chat(con);
             } else {
                 content = "消息开头" + appConfig.getApp().getTuring().getKeyword() + ",会使用图灵机器人;" +
-                        "消息开头" + appConfig.getApp().getOpenai().getKeyword() + ",会使用OpenAI机器人。";
+                        "消息开头" + appConfig.getApp().getOpenai().getKeyword() + ",会使用OpenAI机器人;5s没有返回或者服务器错误请重试。";
             }
         }
         return content;
