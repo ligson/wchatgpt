@@ -1,0 +1,12 @@
+app:
+  server:
+    port: 服务器端口
+  wx:
+    token: 微信token
+  turing:
+    userId: xxx
+    apiKey: xxx
+    keyword: xxx
+  openai:
+    skToken: xxx
+    keyword: xxx

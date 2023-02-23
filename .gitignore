@@ -39,3 +39,4 @@ build/
 logs
 .idea
 !/.idea/
+!/src/main/resources/application.yml
