@@ -3,6 +3,8 @@ app:
     port: 服务器端口
   wx:
     token: 微信token
+    appId: xx
+    appSecret: xxx
   turing:
     userId: xxx
     apiKey: xxx

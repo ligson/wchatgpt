@@ -38,3 +38,4 @@ logs
 !/src/main/resources/application.yml
 /.idea/
 /src/main/resources/application.yml
+/wx-token.json

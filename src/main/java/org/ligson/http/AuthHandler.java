@@ -13,18 +13,22 @@ import org.dom4j.DocumentHelper;
 import org.ligson.chat.impl.OpenAIChatServiceImpl;
 import org.ligson.chat.impl.TuringChatServiceImpl;
 import org.ligson.vo.AppConfig;
+import org.ligson.wx.WXClient;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.*;
 
 @Slf4j
 public class AuthHandler implements HttpHandler {
     private AppConfig appConfig;
     private TuringChatServiceImpl turingChatService;
     private OpenAIChatServiceImpl openAIChatService;
+    private WXClient wxClient;
+    private static final Executor executor = Executors.newCachedThreadPool();
 
     public AuthHandler() {
         try {
@@ -34,6 +38,7 @@ public class AuthHandler implements HttpHandler {
         }
         turingChatService = new TuringChatServiceImpl();
         openAIChatService = new OpenAIChatServiceImpl();
+        wxClient = new WXClient();
     }
 
     public static Map<String, String> queryToMap(String query) {
@@ -55,7 +60,7 @@ public class AuthHandler implements HttpHandler {
         return result;
     }
 
-    private String reply(String str) {
+    private String replyThread(String str) {
         String content = null;
         if (!StringUtils.isBlank(str)) {
             if (str.startsWith(appConfig.getApp().getTuring().getKeyword())) {
@@ -70,6 +75,51 @@ public class AuthHandler implements HttpHandler {
             }
         }
         return content;
+    }
+
+    private void pushMsg2Wx(String toUser, String msg) {
+        //https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=ACCESS_TOKEN
+        wxClient.pushMsg(toUser, msg);
+    }
+
+    private ReplyMsg reply(String toUser, String msg) {
+        long startTime = System.currentTimeMillis();
+        ReplyMsg replyMsg = new ReplyMsg();
+        // 定义超时时间为3秒
+        long timeout = 4800;
+        // 创建一个新的线程池，用于执行要限制时间的方法
+        CompletionService<String> completionService = new ExecutorCompletionService<>(executor);
+        Future<String> future = completionService.submit(() -> replyThread(msg));
+        try {
+            Future<String> result = completionService.poll(timeout, TimeUnit.MILLISECONDS);
+            if (result == null) {
+                long endTime = System.currentTimeMillis();
+                log.warn("调用接口超时,耗时：{}s", (endTime - startTime) / 1000.0);
+                replyMsg.setTimeout(true);
+                executor.execute(() -> {
+                    while (future.isDone()) {
+                    }
+                    long endTime2 = System.currentTimeMillis();
+                    log.debug("接口完成，耗时:{}s", (endTime2 - startTime) / 1000.0);
+                    try {
+                        String msg2 = future.get();
+                        pushMsg2Wx(toUser, msg2);
+                        log.info("主动推送给信息:{}", future.get());
+                    } catch (Exception e) {
+                        log.error("调用接口异常...:{}", e.getMessage());
+                    }
+                    future.cancel(true);
+                });
+            } else {
+                replyMsg.setMsg(result.get());
+            }
+        } catch (Exception e) {
+            future.cancel(true);
+            log.error("线程异常:" + e.getMessage(), e);
+            replyMsg.setTimeout(false);
+
+        }
+        return replyMsg;
     }
 
     @Override
@@ -132,14 +182,20 @@ public class AuthHandler implements HttpHandler {
                 String Content = doc.selectSingleNode("/xml/Content").getText();
                 String MsgId = doc.selectSingleNode("/xml/MsgId").getText();
 
-                String con = reply(Content);
-                if (!StringUtils.isBlank(con)) {
+                ReplyMsg replyMsg = reply(FromUserName, Content);
+                String msg = null;
+                if (replyMsg.isTimeout()) {
+                    msg = "机器人正在思考中...5s没返回，请重试";
+                } else {
+                    msg = replyMsg.getMsg();
+                }
+                if (!StringUtils.isBlank(msg)) {
                     String reply = "<xml>" +
                             "<ToUserName><![CDATA[" + FromUserName + "]]></ToUserName>" +
                             "<FromUserName><![CDATA[" + ToUserName + "]]></FromUserName>" +
                             "<CreateTime>" + System.currentTimeMillis() + "</CreateTime>" +
                             "<MsgType><![CDATA[text]]></MsgType>" +
-                            "<Content><![CDATA[" + con + "]]></Content>" +
+                            "<Content><![CDATA[" + msg + "]]></Content>" +
                             "</xml>";
                     byte[] replyBuf = reply.getBytes();
                     exchange.sendResponseHeaders(200, replyBuf.length);
