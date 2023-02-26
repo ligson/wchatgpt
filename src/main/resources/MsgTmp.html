@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>对话内容</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .msg_container {
+            display: flex;
+            flex-direction: column;
+            background: yellowgreen;
+            border-radius: 5px;
+            padding: 5px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .msg_question {
+            flex: 1;
+            background: whitesmoke;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .msg_question_key {
+            background: #C25C26;
+            padding: 2px;
+            font-weight: bold;
+            border-radius: 5px;
+            color: #FFF;
+        }
+
+        .msg_ask {
+            flex: 1;
+            background: greenyellow;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .msg_ask_key {
+            background: #4BA27E;
+            padding: 2px;
+            font-weight: bold;
+            border-radius: 5px;
+            color: #FFF;
+        }
+
+        .msg_question_content, .msg_ask_content {
+            margin-left: 10px;
+        }
+
+        .msg_question_key, .msg_ask_key, .msg_question_content, .msg_ask_content {
+            font-size: 32px;
+        }
+
+    </style>
+    <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+</head>
+<body>
+<div class="msg_container">
+    <div class="msg_question"><span class="msg_question_key">问:</span><span
+            class="msg_question_content">{{question}}</span></div>
+
+    <div class="msg_ask"><span class="msg_ask_key">答:</span><span class="msg_ask_content" id="msg_ask_content">{{ask}}</span></div>
+</div>
+<script>
+    let text = document.getElementById("msg_ask_content").innerHTML;
+    let converter = new showdown.Converter();
+    let html = converter.makeHtml(text);
+    document.getElementById("msg_ask_content").innerHTML = html;
+</script>
+</body>
+</html>

@@ -1,10 +1,12 @@
 app:
   server:
     port: 服务器端口
+    domainUrl: https://xx
   wx:
     token: 微信token
     appId: xx
     appSecret: xxx
+    msgPath: /app/wchatgpt/msg
   turing:
     userId: xxx
     apiKey: xxx

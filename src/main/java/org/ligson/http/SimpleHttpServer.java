@@ -28,6 +28,8 @@ public class SimpleHttpServer {
 
         AuthHandler authHandler = new AuthHandler();
         httpServer.createContext("/auth",authHandler);
+        MsgHandler msgHandler  = new MsgHandler();
+        httpServer.createContext("/msg",msgHandler);
         Thread thread = new Thread(this::close);
         Runtime.getRuntime().addShutdownHook(thread);
     }

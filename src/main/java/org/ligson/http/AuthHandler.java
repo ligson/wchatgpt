@@ -82,14 +82,14 @@ public class AuthHandler implements HttpHandler {
         wxClient.pushMsg(toUser, msg);
     }
 
-    private ReplyMsg reply(String toUser, String msg) {
+    private ReplyMsg reply(String toUser, String question, String msgId) {
         long startTime = System.currentTimeMillis();
         ReplyMsg replyMsg = new ReplyMsg();
         // 定义超时时间为3秒
         long timeout = 4800;
         // 创建一个新的线程池，用于执行要限制时间的方法
         CompletionService<String> completionService = new ExecutorCompletionService<>(executor);
-        Future<String> future = completionService.submit(() -> replyThread(msg));
+        Future<String> future = completionService.submit(() -> replyThread(question));
         try {
             Future<String> result = completionService.poll(timeout, TimeUnit.MILLISECONDS);
             if (result == null) {
@@ -97,21 +97,27 @@ public class AuthHandler implements HttpHandler {
                 log.warn("调用接口超时,耗时：{}s", (endTime - startTime) / 1000.0);
                 replyMsg.setTimeout(true);
                 executor.execute(() -> {
-                    while (future.isDone()) {
+                    while (true) {
+                        if(future.isDone()){
+                            break;
+                        }
                     }
                     long endTime2 = System.currentTimeMillis();
                     log.debug("接口完成，耗时:{}s", (endTime2 - startTime) / 1000.0);
                     try {
-                        String msg2 = future.get();
-                        pushMsg2Wx(toUser, msg2);
-                        log.info("主动推送给信息:{}", future.get());
+                        String askMsg = future.get();
+                        MsgTemplate.writeMsg(msgId, question, askMsg);
+                        pushMsg2Wx(toUser, askMsg);
+                        log.info("主动推送给信息:{}", askMsg);
                     } catch (Exception e) {
                         log.error("调用接口异常...:{}", e.getMessage());
+                        MsgTemplate.writeMsg(msgId, question, "调用接口异常,"+e.getMessage());
                     }
                     future.cancel(true);
                 });
             } else {
                 replyMsg.setMsg(result.get());
+                MsgTemplate.writeMsg(msgId, question, replyMsg.getMsg());
             }
         } catch (Exception e) {
             future.cancel(true);
@@ -182,10 +188,10 @@ public class AuthHandler implements HttpHandler {
                 String Content = doc.selectSingleNode("/xml/Content").getText();
                 String MsgId = doc.selectSingleNode("/xml/MsgId").getText();
 
-                ReplyMsg replyMsg = reply(FromUserName, Content);
+                ReplyMsg replyMsg = reply(FromUserName, Content,MsgId);
                 String msg = null;
                 if (replyMsg.isTimeout()) {
-                    msg = "机器人正在思考中...5s没返回，请重试";
+                    msg = "机器人正在思考中...5s没返回，请重试,或者点击链接:"+appConfig.getApp().getServer().getDomainUrl()+"/msg/"+MsgId;
                 } else {
                     msg = replyMsg.getMsg();
                 }

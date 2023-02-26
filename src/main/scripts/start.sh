@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 echo "开始启动wchatgpt..."
 WORK_HOME=$(cd ../;pwd)
 

@@ -12,7 +12,8 @@ cd docker-tmp
 mv wchatgpt-${pkVersion} wchatgpt
 cp ../../Dockerfile .
 cp ../../entrypoint.sh .
-docker build -t dockerhub.yonyougov.top/public/wechatgpt:$pkVersion .
+docker build -t dockerhub.yonyougov.top/public/wchatgpt:$pkVersion .
+docker push dockerhub.yonyougov.top/public/wchatgpt:$pkVersion
 
 
 
