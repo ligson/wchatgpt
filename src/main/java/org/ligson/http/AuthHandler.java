@@ -14,11 +14,13 @@ import org.ligson.chat.impl.OpenAIChatServiceImpl;
 import org.ligson.chat.impl.TuringChatServiceImpl;
 import org.ligson.vo.AppConfig;
 import org.ligson.wx.WXClient;
+import org.ligson.wx.vo.ReceivingStdMsgVo;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -60,6 +62,10 @@ public class AuthHandler implements HttpHandler {
         return result;
     }
 
+    private List<String> replyImgThread(String str) {
+        return openAIChatService.imageGenerate(str);
+    }
+
     private String replyThread(String str) {
         String content = null;
         if (!StringUtils.isBlank(str)) {
@@ -70,8 +76,7 @@ public class AuthHandler implements HttpHandler {
                 String con = str.replaceFirst(appConfig.getApp().getOpenai().getKeyword(), "");
                 content = openAIChatService.chat(con);
             } else {
-                content = "消息开头" + appConfig.getApp().getTuring().getKeyword() + ",会使用图灵机器人;" +
-                        "消息开头" + appConfig.getApp().getOpenai().getKeyword() + ",会使用OpenAI机器人;5s没有返回或者服务器错误请重试。";
+                content = "消息开头" + appConfig.getApp().getTuring().getKeyword() + ",会使用图灵机器人;" + "消息开头" + appConfig.getApp().getOpenai().getKeyword() + ",会使用OpenAI机器人;5s没有返回或者服务器错误请重试。";
             }
         }
         return content;
@@ -98,7 +103,7 @@ public class AuthHandler implements HttpHandler {
                 replyMsg.setTimeout(true);
                 executor.execute(() -> {
                     while (true) {
-                        if(future.isDone()){
+                        if (future.isDone()) {
                             break;
                         }
                     }
@@ -111,7 +116,7 @@ public class AuthHandler implements HttpHandler {
                         log.info("主动推送给信息:{}", askMsg);
                     } catch (Exception e) {
                         log.error("调用接口异常...:{}", e.getMessage());
-                        MsgTemplate.writeMsg(msgId, question, "调用接口异常,"+e.getMessage());
+                        MsgTemplate.writeMsg(msgId, question, "调用接口异常," + e.getMessage());
                     }
                     future.cancel(true);
                 });
@@ -126,6 +131,84 @@ public class AuthHandler implements HttpHandler {
 
         }
         return replyMsg;
+    }
+
+    private void imgMsg(ReceivingStdMsgVo receivingStdMsgVo, HttpExchange exchange) throws IOException {
+        String con = receivingStdMsgVo.getContent().replaceFirst(appConfig.getApp().getOpenai().getKeyword(), "");
+        // 定义超时时间为3秒
+        long timeout = 4800;
+        // 创建一个新的线程池，用于执行要限制时间的方法
+        CompletionService<List<String>> completionService = new ExecutorCompletionService<>(executor);
+        Future<List<String>> future = completionService.submit(() -> replyImgThread(receivingStdMsgVo.getContent()));
+        String msg = null;
+
+        Future<List<String>> result = null;
+        try {
+            result = completionService.poll(timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            msg = e.getMessage();
+        }
+        if (result == null) {
+            msg = "机器人正在思考中...5s没返回，请重试,或者点击链接查看,需要等待，" + appConfig.getApp().getServer().getDomainUrl() + "/msg/" + receivingStdMsgVo.getMsgId();
+            //MsgTemplate.writeMsg(receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "正在生成");
+            executor.execute(() -> {
+                while (true) {
+                    if (future.isDone()) {
+                        break;
+                    }
+                }
+                try {
+                    List<String> urls = future.get();
+                    if (!urls.isEmpty()) {
+                        MsgTemplate.writeMsg(receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "<img src='" + urls.get(0) + "'/>");
+                    }
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            });
+
+        } else {
+            List<String> urls = null;
+            try {
+                urls = result.get();
+                if (!urls.isEmpty()) {
+                    String reply = wxClient.buildReplyImgMsg(receivingStdMsgVo.getToUserName(), receivingStdMsgVo.getFromUserName(), urls.get(0), receivingStdMsgVo.getMsgId());
+                    byte[] replyBuf = reply.getBytes();
+                    exchange.sendResponseHeaders(200, replyBuf.length);
+                    exchange.getResponseBody().write(replyBuf);
+                    return;
+                } else {
+                    msg = "没有合适的图片";
+                }
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                msg = e.getMessage();
+            }
+        }
+
+        String reply = wxClient.buildReplyTextMsg(receivingStdMsgVo.getToUserName(), receivingStdMsgVo.getFromUserName(), msg);
+        byte[] replyBuf = reply.getBytes();
+        exchange.sendResponseHeaders(200, replyBuf.length);
+        exchange.getResponseBody().write(replyBuf);
+    }
+
+    private void textMsg(ReceivingStdMsgVo receivingStdMsgVo, HttpExchange exchange) throws IOException {
+        ReplyMsg replyMsg = reply(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getContent(), receivingStdMsgVo.getMsgId());
+        String msg;
+        if (replyMsg.isTimeout()) {
+            msg = "机器人正在思考中...5s没返回，请重试,或者点击链接查看,需要等待，" + appConfig.getApp().getServer().getDomainUrl() + "/msg/" + receivingStdMsgVo.getMsgId();
+        } else {
+            msg = replyMsg.getMsg();
+        }
+        if (!StringUtils.isBlank(msg)) {
+            String reply = wxClient.buildReplyTextMsg(receivingStdMsgVo.getToUserName(), receivingStdMsgVo.getFromUserName(), msg);
+            byte[] replyBuf = reply.getBytes();
+            exchange.sendResponseHeaders(200, replyBuf.length);
+            exchange.getResponseBody().write(replyBuf);
+        } else {
+            log.warn("空内容不恢复");
+            exchange.sendResponseHeaders(200, 0);
+        }
     }
 
     @Override
@@ -166,53 +249,16 @@ public class AuthHandler implements HttpHandler {
                 exchange.sendResponseHeaders(500, 0);
             }
         } else if ("post".equalsIgnoreCase(exchange.getRequestMethod())) {
-            //https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Receiving_standard_messages.html
-            /***
-             * 当普通微信用户向公众账号发消息时，微信服务器将 POST 消息的 XML 数据包到开发者填写的 URL 上。
-             * 请注意：
-             * 关于重试的消息排重，推荐使用 msgid 排重。
-             * 微信服务器在五秒内收不到响应会断掉连接，并且重新发起请求，总共重试三次。假如服务器无法保证在五秒内处理并回复，可以直接回复空串，微信服务器不会对此作任何处理，并且不会发起重试。详情请见“发送消息 - 被动回复消息”。
-             * 如果开发者需要对用户消息在5秒内立即做出回应，即使用“发送消息 - 被动回复消息”接口向用户被动回复消息时，可以在
-             * 公众平台官网的开发者中心处设置消息加密。开启加密后，用户发来的消息和开发者回复的消息都会被加密（但开发者通过客服接口等 API 调用形式向用户发送消息，则不受影响）。关于消息加解密的详细说明，请见“发送消息 - 被动回复消息加解密说明”。
-             *
-             * https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Passive_user_reply_message.html
-             */
             String xml = IOUtils.toString(exchange.getRequestBody(), StandardCharsets.UTF_8);
             log.debug("接收到内容：{}", xml);
-            try {
-                Document doc = DocumentHelper.parseText(xml);
-                String ToUserName = doc.selectSingleNode("/xml/ToUserName").getText();
-                String FromUserName = doc.selectSingleNode("/xml/FromUserName").getText();
-                String CreateTime = doc.selectSingleNode("/xml/CreateTime").getText();
-                String MsgType = doc.selectSingleNode("/xml/MsgType").getText();
-                String Content = doc.selectSingleNode("/xml/Content").getText();
-                String MsgId = doc.selectSingleNode("/xml/MsgId").getText();
-
-                ReplyMsg replyMsg = reply(FromUserName, Content,MsgId);
-                String msg = null;
-                if (replyMsg.isTimeout()) {
-                    msg = "机器人正在思考中...5s没返回，请重试,或者点击链接:"+appConfig.getApp().getServer().getDomainUrl()+"/msg/"+MsgId;
+            ReceivingStdMsgVo receivingStdMsgVo = wxClient.receivingStdMsg(xml);
+            if (receivingStdMsgVo != null) {
+                if (receivingStdMsgVo.getContent().contains("图片")) {
+                    imgMsg(receivingStdMsgVo, exchange);
                 } else {
-                    msg = replyMsg.getMsg();
+                    textMsg(receivingStdMsgVo, exchange);
                 }
-                if (!StringUtils.isBlank(msg)) {
-                    String reply = "<xml>" +
-                            "<ToUserName><![CDATA[" + FromUserName + "]]></ToUserName>" +
-                            "<FromUserName><![CDATA[" + ToUserName + "]]></FromUserName>" +
-                            "<CreateTime>" + System.currentTimeMillis() + "</CreateTime>" +
-                            "<MsgType><![CDATA[text]]></MsgType>" +
-                            "<Content><![CDATA[" + msg + "]]></Content>" +
-                            "</xml>";
-                    byte[] replyBuf = reply.getBytes();
-                    exchange.sendResponseHeaders(200, replyBuf.length);
-                    exchange.getResponseBody().write(replyBuf);
-                } else {
-                    log.warn("空内容不恢复");
-                    exchange.sendResponseHeaders(200, 0);
-                }
-
-            } catch (DocumentException e) {
-                log.error("解析xml:{}失败:{},trace:{}", xml, e.getMessage(), ExceptionUtils.getStackTrace(e));
+            } else {
                 exchange.sendResponseHeaders(200, 0);
             }
         }

@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.message.BasicHeader;
+import org.ligson.openai.vo.req.ImgGenReq;
 import org.ligson.openai.vo.res.CompletionsRes;
+import org.ligson.openai.vo.res.ImgGenRes;
 import org.ligson.serializer.CruxSerializer;
 import org.ligson.serializer.jackson.JacksonSerializer;
 import org.ligson.util.MyHttpClient;
@@ -44,6 +46,15 @@ public class OpenAiClient {
             return myHttpClient.doPost(BASE_URL + "/v1/completions", List.of(authHeader, jsonHeader), req, CompletionsRes.class);
         } catch (Exception e) {
             log.error("请求问答失败:" + e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public ImgGenRes imageGenerations(ImgGenReq req) {
+        try {
+            return myHttpClient.doPost(BASE_URL + "/v1/images/generations", List.of(authHeader, jsonHeader), req, ImgGenRes.class);
+        } catch (Exception e) {
+            log.error("请求图形生成接口:" + e.getMessage(), e);
             return null;
         }
     }
