@@ -2,6 +2,7 @@ package org.ligson.http;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.ligson.vo.AppConfig;
 
 import java.io.*;
@@ -10,6 +11,10 @@ import java.nio.charset.StandardCharsets;
 @Slf4j
 public class MsgTemplate {
     public static void writeMsg(String msgId, String question, String ask) {
+        if (StringUtils.isBlank(ask)) {
+            log.warn("回答是空");
+            ask = "没有返回结果，可能报错了";
+        }
         String string = null;
         try {
             InputStream tmpInput = MsgTemplate.class.getClassLoader().getResourceAsStream("MsgTmp.html");
