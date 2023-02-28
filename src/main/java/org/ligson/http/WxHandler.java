@@ -7,15 +7,14 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
 import org.ligson.chat.impl.OpenAIChatServiceImpl;
 import org.ligson.chat.impl.TuringChatServiceImpl;
+import org.ligson.util.MyHttpClient;
 import org.ligson.vo.AppConfig;
 import org.ligson.wx.WXClient;
 import org.ligson.wx.vo.ReceivingStdMsgVo;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -25,14 +24,15 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 @Slf4j
-public class AuthHandler implements HttpHandler {
+public class WxHandler implements HttpHandler {
     private AppConfig appConfig;
     private TuringChatServiceImpl turingChatService;
     private OpenAIChatServiceImpl openAIChatService;
     private WXClient wxClient;
+    private MyHttpClient myHttpClient;
     private static final Executor executor = Executors.newCachedThreadPool();
 
-    public AuthHandler() {
+    public WxHandler() {
         try {
             appConfig = AppConfig.getInstance();
         } catch (IOException e) {
@@ -41,6 +41,7 @@ public class AuthHandler implements HttpHandler {
         turingChatService = new TuringChatServiceImpl();
         openAIChatService = new OpenAIChatServiceImpl();
         wxClient = new WXClient();
+        myHttpClient = new MyHttpClient();
     }
 
     public static Map<String, String> queryToMap(String query) {
@@ -87,7 +88,7 @@ public class AuthHandler implements HttpHandler {
         wxClient.pushMsg(toUser, msg);
     }
 
-    private ReplyMsg reply(String toUser, String question, String msgId) {
+    private ReplyMsg replyText(String toUser, String question, String msgId) {
         long startTime = System.currentTimeMillis();
         ReplyMsg replyMsg = new ReplyMsg();
         // 定义超时时间为3秒
@@ -111,18 +112,18 @@ public class AuthHandler implements HttpHandler {
                     log.debug("接口完成，耗时:{}s", (endTime2 - startTime) / 1000.0);
                     try {
                         String askMsg = future.get();
-                        MsgTemplate.writeMsg(msgId, question, askMsg);
+                        MsgTemplate.writeMsg(toUser, msgId, question, askMsg);
                         pushMsg2Wx(toUser, askMsg);
                         log.info("主动推送给信息:{}", askMsg);
                     } catch (Exception e) {
-                        log.error("调用接口异常...:{}", e.getMessage());
-                        MsgTemplate.writeMsg(msgId, question, "调用接口异常," + e.getMessage());
+                        log.error("调用接口异常...:{},stack:{}", e.getMessage(), ExceptionUtils.getStackTrace(e));
+                        MsgTemplate.writeMsg(toUser, msgId, question, "调用接口异常," + e.getMessage());
                     }
                     future.cancel(true);
                 });
             } else {
                 replyMsg.setMsg(result.get());
-                MsgTemplate.writeMsg(msgId, question, replyMsg.getMsg());
+                MsgTemplate.writeMsg(toUser, msgId, question, replyMsg.getMsg());
             }
         } catch (Exception e) {
             future.cancel(true);
@@ -133,7 +134,7 @@ public class AuthHandler implements HttpHandler {
         return replyMsg;
     }
 
-    private void imgMsg(ReceivingStdMsgVo receivingStdMsgVo, HttpExchange exchange) throws IOException {
+    private String imgMsg(ReceivingStdMsgVo receivingStdMsgVo, HttpExchange exchange) throws IOException {
         String con = receivingStdMsgVo.getContent().replaceFirst(appConfig.getApp().getOpenai().getKeyword(), "");
         // 定义超时时间为3秒
         long timeout = 4800;
@@ -160,23 +161,28 @@ public class AuthHandler implements HttpHandler {
                 try {
                     List<String> urls = future.get();
                     if (!urls.isEmpty()) {
-                        MsgTemplate.writeMsg(receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "<img src='" + urls.get(0) + "'/>");
+                        File destFile = myHttpClient.download(urls.get(0), "0", appConfig.getApp().getWx().getMsgPath() + "/" + receivingStdMsgVo.getFromUserName() + "/" + receivingStdMsgVo.getMsgId());
+                        if (destFile != null) {
+                            String imgUrl = appConfig.getApp().getServer().getDomainUrl() + "/msg-img/" + receivingStdMsgVo.getFromUserName() + "/" + receivingStdMsgVo.getMsgId() + "/" + destFile.getName();
+                            MsgTemplate.writeMsg(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "<img src='" + imgUrl + "'/>");
+                        } else {
+                            MsgTemplate.writeMsg(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "获取图片" + urls.get(0) + "失败");
+                        }
+                    } else {
+                        MsgTemplate.writeMsg(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "获取图片失败");
                     }
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
+                    MsgTemplate.writeMsg(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), e.getMessage());
                 }
             });
 
         } else {
-            List<String> urls = null;
+            List<String> urls;
             try {
                 urls = result.get();
                 if (!urls.isEmpty()) {
-                    String reply = wxClient.buildReplyImgMsg(receivingStdMsgVo.getToUserName(), receivingStdMsgVo.getFromUserName(), urls.get(0), receivingStdMsgVo.getMsgId());
-                    byte[] replyBuf = reply.getBytes();
-                    exchange.sendResponseHeaders(200, replyBuf.length);
-                    exchange.getResponseBody().write(replyBuf);
-                    return;
+                    return wxClient.buildReplyImgMsg(receivingStdMsgVo.getToUserName(), receivingStdMsgVo.getFromUserName(), urls.get(0), receivingStdMsgVo.getMsgId());
                 } else {
                     msg = "没有合适的图片";
                 }
@@ -186,28 +192,22 @@ public class AuthHandler implements HttpHandler {
             }
         }
 
-        String reply = wxClient.buildReplyTextMsg(receivingStdMsgVo.getToUserName(), receivingStdMsgVo.getFromUserName(), msg);
-        byte[] replyBuf = reply.getBytes();
-        exchange.sendResponseHeaders(200, replyBuf.length);
-        exchange.getResponseBody().write(replyBuf);
+        return wxClient.buildReplyTextMsg(receivingStdMsgVo.getToUserName(), receivingStdMsgVo.getFromUserName(), msg);
     }
 
-    private void textMsg(ReceivingStdMsgVo receivingStdMsgVo, HttpExchange exchange) throws IOException {
-        ReplyMsg replyMsg = reply(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getContent(), receivingStdMsgVo.getMsgId());
+    private String textMsg(ReceivingStdMsgVo receivingStdMsgVo, HttpExchange exchange) throws IOException {
+        ReplyMsg replyMsg = replyText(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getContent(), receivingStdMsgVo.getMsgId());
         String msg;
         if (replyMsg.isTimeout()) {
-            msg = "机器人正在思考中...5s没返回，请重试,或者点击链接查看,需要等待，" + appConfig.getApp().getServer().getDomainUrl() + "/msg/" + receivingStdMsgVo.getMsgId();
+            msg = "机器人正在思考中...5s没返回，请重试,或者点击链接查看,需要等待，" + appConfig.getApp().getServer().getDomainUrl() + "/msg/" + receivingStdMsgVo.getFromUserName() + "/" + receivingStdMsgVo.getMsgId();
         } else {
             msg = replyMsg.getMsg();
         }
         if (!StringUtils.isBlank(msg)) {
-            String reply = wxClient.buildReplyTextMsg(receivingStdMsgVo.getToUserName(), receivingStdMsgVo.getFromUserName(), msg);
-            byte[] replyBuf = reply.getBytes();
-            exchange.sendResponseHeaders(200, replyBuf.length);
-            exchange.getResponseBody().write(replyBuf);
+            return wxClient.buildReplyTextMsg(receivingStdMsgVo.getToUserName(), receivingStdMsgVo.getFromUserName(), msg);
         } else {
             log.warn("空内容不恢复");
-            exchange.sendResponseHeaders(200, 0);
+            return null;
         }
     }
 
@@ -253,10 +253,18 @@ public class AuthHandler implements HttpHandler {
             log.debug("接收到内容：{}", xml);
             ReceivingStdMsgVo receivingStdMsgVo = wxClient.receivingStdMsg(xml);
             if (receivingStdMsgVo != null) {
-                if (receivingStdMsgVo.getContent().contains("图片")) {
-                    imgMsg(receivingStdMsgVo, exchange);
+                String reply = null;
+                if (receivingStdMsgVo.getContent().contains("图片") || receivingStdMsgVo.getContent().contains("照片")) {
+                    reply = imgMsg(receivingStdMsgVo, exchange);
                 } else {
-                    textMsg(receivingStdMsgVo, exchange);
+                    reply = textMsg(receivingStdMsgVo, exchange);
+                }
+                if (reply != null) {
+                    byte[] replyBuf = reply.getBytes();
+                    exchange.sendResponseHeaders(200, replyBuf.length);
+                    exchange.getResponseBody().write(replyBuf);
+                } else {
+                    exchange.sendResponseHeaders(200, 0);
                 }
             } else {
                 exchange.sendResponseHeaders(200, 0);

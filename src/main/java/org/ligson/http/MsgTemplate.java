@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 @Slf4j
 public class MsgTemplate {
-    public static void writeMsg(String msgId, String question, String ask) {
+    public static void writeMsg(String toUser, String msgId, String question, String ask) {
         if (StringUtils.isBlank(ask)) {
             log.warn("回答是空");
             ask = "没有返回结果，可能报错了";
@@ -28,7 +28,7 @@ public class MsgTemplate {
         log.debug("模板替换后:{}", string);
         File msgDir = null;
         try {
-            msgDir = new File(AppConfig.getInstance().getApp().getWx().getMsgPath());
+            msgDir = new File(AppConfig.getInstance().getApp().getWx().getMsgPath(), toUser);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -46,14 +46,14 @@ public class MsgTemplate {
         }
     }
 
-    public static String getMsgHtml(String msgId) {
+    public static String getMsgHtml(String toUser, String msgId) {
         String msgDir = null;
         try {
             msgDir = AppConfig.getInstance().getApp().getWx().getMsgPath();
         } catch (IOException e) {
             return null;
         }
-        File msgFile = new File(msgDir, msgId + ".html");
+        File msgFile = new File(msgDir, toUser + "/" + msgId + ".html");
         if (!msgFile.exists()) {
             return null;
         } else {

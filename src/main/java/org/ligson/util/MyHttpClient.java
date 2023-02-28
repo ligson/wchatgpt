@@ -1,6 +1,8 @@
 package org.ligson.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
@@ -14,7 +16,12 @@ import org.apache.hc.core5.util.Timeout;
 import org.ligson.serializer.CruxSerializer;
 import org.ligson.serializer.jackson.JacksonSerializer;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -71,6 +78,25 @@ public class MyHttpClient {
 
     private <T> T deserialize(String result, Class<T> returnType) {
         return serializer.deserialize(result, returnType);
+    }
+
+    public File download(String url, String fileName, String destDir) throws IOException {
+        HttpGet get = new HttpGet(url);
+        MyFileHttpClientResponseHandler myHttpClientResponseHandler = new MyFileHttpClientResponseHandler();
+        File file = httpClient.execute(get, myHttpClientResponseHandler);
+        if (file == null) {
+            log.error("下载url:{}到:{}失败", url, destDir + "/" + fileName);
+            return null;
+        } else {
+            String ext = FilenameUtils.getExtension(file.getName());
+            FileInputStream fis = new FileInputStream(file);
+            File destFile = new File(destDir, fileName + "." + ext);
+            FileOutputStream fos = new FileOutputStream(destFile);
+            IOUtils.copy(fis, fos);
+            fis.close();
+            fos.close();
+            return destFile;
+        }
     }
 
 }

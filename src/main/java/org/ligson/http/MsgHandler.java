@@ -14,9 +14,17 @@ public class MsgHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
-        log.debug("请求path:{}",path);
-        String msgId = path.replace("/msg/", "");
-        String html = MsgTemplate.getMsgHtml(msgId);
+        log.debug("请求path:{}", path);
+        //"/msg/user/sd"
+        String[] arr = path.split("/");
+        if (arr.length != 4) {
+            exchange.sendResponseHeaders(404, 0);
+            exchange.close();
+            return;
+        }
+        String msgId = arr[3];
+        String userId = arr[2];
+        String html = MsgTemplate.getMsgHtml(userId, msgId);
         if (StringUtils.isBlank(html)) {
             html = "<p>消息还未生成</p>";
         }

@@ -26,10 +26,12 @@ public class SimpleHttpServer {
             }
         });
 
-        AuthHandler authHandler = new AuthHandler();
-        httpServer.createContext("/auth",authHandler);
+        WxHandler wxHandler = new WxHandler();
+        httpServer.createContext("/auth", wxHandler);
         MsgHandler msgHandler  = new MsgHandler();
         httpServer.createContext("/msg",msgHandler);
+        MsgImgHandler msgImgHandler = new MsgImgHandler();
+        httpServer.createContext("/msg-img",msgImgHandler);
         Thread thread = new Thread(this::close);
         Runtime.getRuntime().addShutdownHook(thread);
     }
