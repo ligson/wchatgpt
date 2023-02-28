@@ -39,3 +39,5 @@ logs
 /.idea/
 /src/main/resources/application.yml
 /wx-token.json
+!/msg/
+/msg

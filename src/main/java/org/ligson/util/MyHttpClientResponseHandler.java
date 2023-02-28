@@ -15,6 +15,7 @@ public class MyHttpClientResponseHandler implements HttpClientResponseHandler<St
     @Override
     public String handleResponse(ClassicHttpResponse response) throws HttpException, IOException {
         String result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+        EntityUtils.consume(response.getEntity());
         log.debug("http code:{},result:{}", response.getCode(), result);
         if (response.getCode() != HttpStatus.SC_OK) {
             log.error("http request error:{}", response.getReasonPhrase());

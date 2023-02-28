@@ -90,7 +90,14 @@ public class MyHttpClient {
         } else {
             String ext = FilenameUtils.getExtension(file.getName());
             FileInputStream fis = new FileInputStream(file);
+            File destDirFile = new File(destDir);
+            if (!destDirFile.exists()) {
+                destDirFile.mkdirs();
+            }
             File destFile = new File(destDir, fileName + "." + ext);
+            if (!destFile.exists()) {
+                destFile.createNewFile();
+            }
             FileOutputStream fos = new FileOutputStream(destFile);
             IOUtils.copy(fis, fos);
             fis.close();
