@@ -150,7 +150,7 @@ public class WxHandler implements HttpHandler {
             msg = e.getMessage();
         }
         if (result == null) {
-            msg = "机器人正在思考中...5s没返回，请重试,或者点击链接查看,需要等待，" + appConfig.getApp().getServer().getDomainUrl() + "/msg/" + receivingStdMsgVo.getMsgId();
+            msg = "机器人正在思考中...5s没返回，请重试,或者点击链接查看,需要等待，" + appConfig.getApp().getServer().getDomainUrl() + "/msg/" + receivingStdMsgVo.getFromUserName() + "/" + receivingStdMsgVo.getMsgId();
             //MsgTemplate.writeMsg(receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "正在生成");
             executor.execute(() -> {
                 while (true) {
