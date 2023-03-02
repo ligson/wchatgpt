@@ -28,8 +28,14 @@ public class BootApplication {
 
     public BeanModel getOneBeanByClass(Class<?> clazz) {
         for (BeanModel value : beanContainer.values()) {
-            if (value.getBeanType() == clazz) {
-                return value;
+            if (clazz.isInterface()) {
+                if (value.getBeanType().isAssignableFrom(clazz)) {
+                    return value;
+                }
+            } else {
+                if (value.getBeanType() == clazz) {
+                    return value;
+                }
             }
         }
         return null;

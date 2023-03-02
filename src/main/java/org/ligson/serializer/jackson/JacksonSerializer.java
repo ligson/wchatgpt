@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.ligson.fw.annotation.BootService;
 import org.ligson.serializer.CruxSerializer;
 
+@BootService
 @Slf4j
 public class JacksonSerializer implements CruxSerializer {
     private ObjectMapper objectMapper;

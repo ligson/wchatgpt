@@ -1,6 +1,6 @@
 package org.ligson.chat.impl;
 
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.ligson.chat.ChatService;
 import org.ligson.fw.annotation.BootAutowired;
@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @BootService(initMethod = "init")
+@Slf4j
 public class OpenAIChatServiceImpl implements ChatService {
     private OpenAiClient openAiClient;
 
@@ -31,9 +32,13 @@ public class OpenAIChatServiceImpl implements ChatService {
     @BootAutowired
     private MyHttpClient myHttpClient;
 
-    @SneakyThrows
+    public OpenAIChatServiceImpl() {
+        log.debug("---");
+    }
+
     public void init() {
-        openAiClient = new OpenAiClient(appConfig.getApp().getOpenai().getSkToken(), myHttpClient, cruxSerializer);
+        this.openAiClient = new OpenAiClient(appConfig.getApp().getOpenai().getSkToken(), myHttpClient, cruxSerializer);
+        log.debug("openAiClient is :{}", this.openAiClient.hashCode());
     }
 
     @Override

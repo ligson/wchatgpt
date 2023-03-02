@@ -26,7 +26,7 @@ public class TuringChatServiceImpl implements ChatService {
 
     @SneakyThrows
     public void init() {
-        turingClient = new TuringClient(appConfig.getApp().getTuring().getUserId(),
+        this.turingClient = new TuringClient(appConfig.getApp().getTuring().getUserId(),
                 appConfig.getApp().getTuring().getApiKey(),
                 myHttpClient,
                 cruxSerializer);

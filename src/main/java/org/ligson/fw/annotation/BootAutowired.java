@@ -6,5 +6,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface BootAutowired {
+    boolean byType() default true;
+
     String name() default "";
 }

@@ -98,7 +98,7 @@ public class FwBooter {
             }
             //service
             for (Class<?> serviceClass : serviceClasses) {
-                BeanModel bm = loadService(serviceClass);
+                BeanModel bm = loadService(serviceClass, serviceClasses);
                 log.debug("bean加载成功，类型:{},名称:{}", serviceClass.getSimpleName(), bm.getBeanName());
             }
             //service init
@@ -117,38 +117,76 @@ public class FwBooter {
                     });
                 }
             }
+            log.info("load service success");
 
         } else {
             log.error("{} need BootApp annotation", clazz.getSimpleName());
         }
     }
 
-    private static BeanModel loadService(Class<?> serviceClass) {
+    private static BeanModel loadService(Class<?> serviceClass, Set<Class<?>> serviceClasses) {
+        BeanModel bm1 = bootApplication.getOneBeanByClass(serviceClass);
+        if (bm1 != null) {
+            return bm1;
+        }
+
+        Class<?> realServiceClass = serviceClass;
+        if (serviceClass.isInterface()) {
+            for (Class<?> aClass : serviceClasses) {
+                log.debug("类型:{}----{}00--{}---{}", serviceClass.getName(), aClass.getName(), serviceClass.isAssignableFrom(aClass), aClass.isAssignableFrom(serviceClass));
+                if (serviceClass.isAssignableFrom(aClass)) {
+                    BeanModel bm2 = bootApplication.getOneBeanByClass(aClass);
+                    if (bm2 != null) {
+                        return bm2;
+                    } else {
+                        realServiceClass = aClass;
+                        break;
+                    }
+                }
+            }
+            log.debug("类型:{}是个接口，使用具体实现:{}", serviceClass.getName(), realServiceClass.getSimpleName());
+        }
         Object serviceInstance;
         try {
-            serviceInstance = serviceClass.getConstructor().newInstance();
+            serviceInstance = realServiceClass.getConstructor().newInstance();
         } catch (Exception e) {
-            log.error("服务类:{}实例化失败:{},stack:{}", serviceClass.getName(), e.getMessage(), ExceptionUtils.getStackTrace(e));
+            log.error("服务类:{}实例化失败:{},stack:{}", realServiceClass.getName(), e.getMessage(), ExceptionUtils.getStackTrace(e));
             throw new RuntimeException(e);
         }
-        Field[] fields = FieldUtils.getFieldsWithAnnotation(serviceClass, BootAutowired.class);
+        Field[] fields = FieldUtils.getFieldsWithAnnotation(realServiceClass, BootAutowired.class);
         for (Field field : fields) {
-            BeanModel bm = bootApplication.getBeanModelByName(field.getName());
-            if (bm == null) {
-                bm = loadService(field.getType());
+            BeanModel bm3 = null;
+            BootAutowired bootAutowired = field.getAnnotation(BootAutowired.class);
+            if (bootAutowired.byType()) {
+                bm3 = bootApplication.getOneBeanByClass(field.getType());
+            } else {
+                if (StringUtils.isNoneBlank(bootAutowired.name())) {
+                    bm3 = bootApplication.getBeanModelByName(bootAutowired.name());
+                } else {
+                    bm3 = bootApplication.getBeanModelByName(field.getName());
+                }
+            }
+            if (bm3 == null) {
+                bm3 = loadService(field.getType(), serviceClasses);
             }
             try {
-                FieldUtils.writeField(field, serviceInstance, bm.getBeanInstance(), true);
+                FieldUtils.writeField(field, serviceInstance, bm3.getBeanInstance(), true);
             } catch (IllegalAccessException e) {
-                log.error("服务类:{}注入字段:{},失败:{},stack:{}", serviceClass.getName(), field.getName(), e.getMessage(), ExceptionUtils.getStackTrace(e));
+                log.error("服务类:{}注入字段:{},失败:{},stack:{}", realServiceClass.getName(), field.getName(), e.getMessage(), ExceptionUtils.getStackTrace(e));
                 throw new RuntimeException(e);
             }
         }
+        BootService bootService = realServiceClass.getAnnotation(BootService.class);
         BeanModel beanModel = new BeanModel();
         beanModel.setBeanInstance(serviceInstance);
         beanModel.setBeanType(serviceInstance.getClass());
-        String name = Character.toLowerCase(serviceInstance.getClass().getSimpleName().charAt(0)) + serviceInstance.getClass().getSimpleName().substring(1);
-        beanModel.setBeanName(name);
+        if (StringUtils.isNoneBlank(bootService.name())) {
+            beanModel.setBeanName(bootService.name());
+        } else {
+            String name = Character.toLowerCase(serviceInstance.getClass().getSimpleName().charAt(0)) + serviceInstance.getClass().getSimpleName().substring(1);
+            beanModel.setBeanName(name);
+        }
+
         bootApplication.putBean(beanModel.getBeanName(), beanModel);
         return beanModel;
     }
