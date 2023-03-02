@@ -1,19 +1,16 @@
 package org.ligson.openai;
 
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.message.BasicHeader;
+import org.ligson.openai.vo.ModelResult;
+import org.ligson.openai.vo.req.CompletionsReq;
 import org.ligson.openai.vo.req.ImgGenReq;
 import org.ligson.openai.vo.res.CompletionsRes;
 import org.ligson.openai.vo.res.ImgGenRes;
 import org.ligson.serializer.CruxSerializer;
-import org.ligson.serializer.jackson.JacksonSerializer;
 import org.ligson.util.MyHttpClient;
-import org.ligson.openai.vo.req.CompletionsReq;
-import org.ligson.openai.vo.ModelResult;
 
 import java.util.List;
 
@@ -26,10 +23,10 @@ public class OpenAiClient {
     private final Header authHeader;
     private final Header jsonHeader = new BasicHeader("Content-Type", "application/json;charset=UTF-8");
 
-    public OpenAiClient(String skToken) {
-        myHttpClient = new MyHttpClient();
+    public OpenAiClient(String skToken, MyHttpClient myHttpClient, CruxSerializer cruxSerializer) {
+        this.serializer = cruxSerializer;
+        this.myHttpClient = myHttpClient;
         authHeader = new BasicHeader("Authorization", "Bearer " + skToken);
-        serializer = new JacksonSerializer();
     }
 
     public ModelResult models() {

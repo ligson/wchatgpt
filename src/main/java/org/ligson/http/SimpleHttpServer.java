@@ -2,42 +2,48 @@ package org.ligson.http;
 
 import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
+import org.ligson.fw.annotation.BootAutowired;
+import org.ligson.fw.annotation.BootService;
+import org.ligson.http.handler.MsgHandler;
+import org.ligson.http.handler.MsgImgHandler;
+import org.ligson.http.handler.TestHandler;
+import org.ligson.http.handler.WxHandler;
 import org.ligson.vo.AppConfig;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 
+@BootService(initMethod = "init")
 @Slf4j
 public class SimpleHttpServer {
+
     private HttpServer httpServer;
+    @BootAutowired
     private AppConfig appConfig;
+    @BootAutowired
+    private WxHandler wxHandler;
+    @BootAutowired
+    private MsgHandler msgHandler;
+    @BootAutowired
+    private MsgImgHandler msgImgHandler;
 
-    public SimpleHttpServer() throws Exception {
-        appConfig = AppConfig.getInstance();
+    @BootAutowired
+    private TestHandler testHandler;
+
+    public void init() throws Exception {
         httpServer = HttpServer.create(new InetSocketAddress(appConfig.getApp().getServer().getPort()), 100);
-        httpServer.createContext("/test", exchange -> {
-            if ("get".equalsIgnoreCase(exchange.getRequestMethod())) {
-                log.debug("test invoke....");
-                byte[] buffer = "ok".getBytes(StandardCharsets.UTF_8);
-                exchange.sendResponseHeaders(200, buffer.length);
-                exchange.getResponseHeaders().add("Content-Type", "application/text;charset=UTF-8");
-                exchange.getResponseBody().write(buffer);
-                exchange.getResponseBody().close();
-            }
-        });
 
-        WxHandler wxHandler = new WxHandler();
+        httpServer.createContext("/test", testHandler);
         httpServer.createContext("/auth", wxHandler);
-        MsgHandler msgHandler  = new MsgHandler();
-        httpServer.createContext("/msg",msgHandler);
-        MsgImgHandler msgImgHandler = new MsgImgHandler();
-        httpServer.createContext("/msg-img",msgImgHandler);
+        httpServer.createContext("/msg", msgHandler);
+        httpServer.createContext("/msg-img", msgImgHandler);
         Thread thread = new Thread(this::close);
         Runtime.getRuntime().addShutdownHook(thread);
+
+        start();
     }
 
     public void start() {
-        log.debug("服务器启动...");
+        log.debug("服务器启动，端口:{}...", appConfig.getApp().getServer().getPort());
         httpServer.start();
     }
 

@@ -1,28 +1,23 @@
-package org.ligson.http;
+package org.ligson.http.handler;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.ligson.fw.annotation.BootAutowired;
+import org.ligson.fw.annotation.BootService;
 import org.ligson.vo.AppConfig;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 
+@BootService
 @Slf4j
 public class MsgImgHandler implements HttpHandler {
+    @BootAutowired
     private AppConfig appConfig;
-
-    public MsgImgHandler() {
-        try {
-            appConfig = AppConfig.getInstance();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {

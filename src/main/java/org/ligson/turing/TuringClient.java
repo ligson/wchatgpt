@@ -19,11 +19,11 @@ public class TuringClient {
     private static final String baseUrl = "http://openapi.turingapi.com/openapi/api/v2";
     private final CruxSerializer serializer;
 
-    public TuringClient(String userId, String apiKey) {
+    public TuringClient(String userId, String apiKey, MyHttpClient myHttpClient, CruxSerializer serializer) {
         this.apiKey = apiKey;
         this.userId = userId;
-        myHttpClient = new MyHttpClient();
-        serializer = new JacksonSerializer();
+        this.myHttpClient = myHttpClient;
+        this.serializer = serializer;
     }
 
     public TuringResult chat(String msg) {

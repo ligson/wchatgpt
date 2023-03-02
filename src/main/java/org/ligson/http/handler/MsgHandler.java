@@ -1,15 +1,21 @@
-package org.ligson.http;
+package org.ligson.http.handler;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.ligson.fw.annotation.BootAutowired;
+import org.ligson.fw.annotation.BootService;
+import org.ligson.http.MsgTemplate;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+@BootService
 @Slf4j
 public class MsgHandler implements HttpHandler {
+    @BootAutowired
+    private MsgTemplate msgTemplate;
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -24,7 +30,7 @@ public class MsgHandler implements HttpHandler {
         }
         String msgId = arr[3];
         String userId = arr[2];
-        String html = MsgTemplate.getMsgHtml(userId, msgId);
+        String html = msgTemplate.getMsgHtml(userId, msgId);
         if (StringUtils.isBlank(html)) {
             html = "<p>消息还未生成</p>";
         }

@@ -3,6 +3,8 @@ package org.ligson.chat.impl;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.ligson.chat.ChatService;
+import org.ligson.fw.annotation.BootAutowired;
+import org.ligson.fw.annotation.BootService;
 import org.ligson.openai.OpenAiClient;
 import org.ligson.openai.vo.req.CompletionsReq;
 import org.ligson.openai.vo.req.ImgGenReq;
@@ -10,20 +12,28 @@ import org.ligson.openai.vo.res.Choice;
 import org.ligson.openai.vo.res.CompletionsRes;
 import org.ligson.openai.vo.res.ImgGenData;
 import org.ligson.openai.vo.res.ImgGenRes;
+import org.ligson.serializer.CruxSerializer;
+import org.ligson.util.MyHttpClient;
 import org.ligson.vo.AppConfig;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@BootService(initMethod = "init")
 public class OpenAIChatServiceImpl implements ChatService {
     private OpenAiClient openAiClient;
+
+    @BootAutowired
     private AppConfig appConfig;
+    @BootAutowired
+    private CruxSerializer cruxSerializer;
+    @BootAutowired
+    private MyHttpClient myHttpClient;
 
     @SneakyThrows
-    public OpenAIChatServiceImpl() {
-        appConfig = AppConfig.getInstance();
-        openAiClient = new OpenAiClient(appConfig.getApp().getOpenai().getSkToken());
+    public void init() {
+        openAiClient = new OpenAiClient(appConfig.getApp().getOpenai().getSkToken(), myHttpClient, cruxSerializer);
     }
 
     @Override

@@ -6,8 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
+import org.ligson.fw.annotation.BootAutowired;
+import org.ligson.fw.annotation.BootService;
 import org.ligson.serializer.CruxSerializer;
-import org.ligson.serializer.jackson.JacksonSerializer;
 import org.ligson.util.MyHttpClient;
 import org.ligson.vo.AppConfig;
 import org.ligson.vo.WXVo;
@@ -23,22 +24,18 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
+@BootService
 @Slf4j
 public class WXClient {
     private static final String baseUrl = "https://api.weixin.qq.com/cgi-bin";
-    private MyHttpClient myHttpClient = new MyHttpClient();
-    AppConfig appConfig;
+    @BootAutowired
+    private MyHttpClient myHttpClient;
+    @BootAutowired
+    private AppConfig appConfig;
     private static AccessTokenRes accessTokenRes;
+    @BootAutowired
     private CruxSerializer cruxSerializer;
 
-    public WXClient() {
-        try {
-            appConfig = AppConfig.getInstance();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        cruxSerializer = new JacksonSerializer();
-    }
 
     public void pushMsg(String toUser, String msg) {
         CustomMsg cm = CustomMsg.newInstance(toUser, "text", msg);
@@ -71,6 +68,10 @@ public class WXClient {
             String FromUserName = doc.selectSingleNode("/xml/FromUserName").getText();
             String CreateTime = doc.selectSingleNode("/xml/CreateTime").getText();
             String MsgType = doc.selectSingleNode("/xml/MsgType").getText();
+            //TODO 目前支能处理文本
+            if (!"text".equals(MsgType)) {
+                return null;
+            }
             String Content = doc.selectSingleNode("/xml/Content").getText();
             String MsgId = doc.selectSingleNode("/xml/MsgId").getText();
             ReceivingStdMsgVo receivingStdMsgVo = new ReceivingStdMsgVo(ToUserName, FromUserName, Long.parseLong(CreateTime), MsgType, Content, MsgId);

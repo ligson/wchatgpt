@@ -1,4 +1,4 @@
-package org.ligson.http;
+package org.ligson.http.handler;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -9,6 +9,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.ligson.chat.impl.OpenAIChatServiceImpl;
 import org.ligson.chat.impl.TuringChatServiceImpl;
+import org.ligson.fw.annotation.BootAutowired;
+import org.ligson.fw.annotation.BootService;
+import org.ligson.http.MsgTemplate;
+import org.ligson.http.ReplyMsg;
 import org.ligson.util.MyHttpClient;
 import org.ligson.vo.AppConfig;
 import org.ligson.wx.WXClient;
@@ -23,26 +27,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
+@BootService
 @Slf4j
 public class WxHandler implements HttpHandler {
+    @BootAutowired
     private AppConfig appConfig;
+    @BootAutowired
     private TuringChatServiceImpl turingChatService;
+    @BootAutowired
     private OpenAIChatServiceImpl openAIChatService;
+    @BootAutowired
     private WXClient wxClient;
+    @BootAutowired
     private MyHttpClient myHttpClient;
+    @BootAutowired
+    private MsgTemplate msgTemplate;
     private static final Executor executor = Executors.newCachedThreadPool();
-
-    public WxHandler() {
-        try {
-            appConfig = AppConfig.getInstance();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        turingChatService = new TuringChatServiceImpl();
-        openAIChatService = new OpenAIChatServiceImpl();
-        wxClient = new WXClient();
-        myHttpClient = new MyHttpClient();
-    }
 
     public static Map<String, String> queryToMap(String query) {
 
@@ -112,18 +112,18 @@ public class WxHandler implements HttpHandler {
                     log.debug("接口完成，耗时:{}s", (endTime2 - startTime) / 1000.0);
                     try {
                         String askMsg = future.get();
-                        MsgTemplate.writeMsg(toUser, msgId, question, askMsg);
+                        msgTemplate.writeMsg(toUser, msgId, question, askMsg);
                         pushMsg2Wx(toUser, askMsg);
                         log.info("主动推送给信息:{}", askMsg);
                     } catch (Exception e) {
                         log.error("调用接口异常...:{},stack:{}", e.getMessage(), ExceptionUtils.getStackTrace(e));
-                        MsgTemplate.writeMsg(toUser, msgId, question, "调用接口异常," + e.getMessage());
+                        msgTemplate.writeMsg(toUser, msgId, question, "调用接口异常," + e.getMessage());
                     }
                     future.cancel(true);
                 });
             } else {
                 replyMsg.setMsg(result.get());
-                MsgTemplate.writeMsg(toUser, msgId, question, replyMsg.getMsg());
+                msgTemplate.writeMsg(toUser, msgId, question, replyMsg.getMsg());
             }
         } catch (Exception e) {
             future.cancel(true);
@@ -151,7 +151,7 @@ public class WxHandler implements HttpHandler {
         }
         if (result == null) {
             msg = "机器人正在思考中...5s没返回，请重试,或者点击链接查看,需要等待，" + appConfig.getApp().getServer().getDomainUrl() + "/msg/" + receivingStdMsgVo.getFromUserName() + "/" + receivingStdMsgVo.getMsgId();
-            //MsgTemplate.writeMsg(receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "正在生成");
+            //msgTemplate.writeMsg(receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "正在生成");
             executor.execute(() -> {
                 while (true) {
                     if (future.isDone()) {
@@ -164,16 +164,16 @@ public class WxHandler implements HttpHandler {
                         File destFile = myHttpClient.download(urls.get(0), "0", appConfig.getApp().getWx().getMsgPath() + "/" + receivingStdMsgVo.getFromUserName() + "/" + receivingStdMsgVo.getMsgId());
                         if (destFile != null) {
                             String imgUrl = appConfig.getApp().getServer().getDomainUrl() + "/msg-img/" + receivingStdMsgVo.getFromUserName() + "/" + receivingStdMsgVo.getMsgId() + "/" + destFile.getName();
-                            MsgTemplate.writeMsg(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "<img src='" + imgUrl + "'/>");
+                            msgTemplate.writeMsg(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "<img src='" + imgUrl + "'/>");
                         } else {
-                            MsgTemplate.writeMsg(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "获取图片" + urls.get(0) + "失败");
+                            msgTemplate.writeMsg(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "获取图片" + urls.get(0) + "失败");
                         }
                     } else {
-                        MsgTemplate.writeMsg(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "获取图片失败");
+                        msgTemplate.writeMsg(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), "获取图片失败");
                     }
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);
-                    MsgTemplate.writeMsg(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), e.getMessage());
+                    msgTemplate.writeMsg(receivingStdMsgVo.getFromUserName(), receivingStdMsgVo.getMsgId(), receivingStdMsgVo.getContent(), e.getMessage());
                 }
             });
 
