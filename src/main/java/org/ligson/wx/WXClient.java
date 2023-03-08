@@ -38,6 +38,10 @@ public class WXClient {
 
 
     public void pushMsg(String toUser, String msg) {
+        if (StringUtils.isBlank(msg)) {
+            log.debug("消息是空不进行推送");
+            return;
+        }
         CustomMsg cm = CustomMsg.newInstance(toUser, "text", msg);
         try {
             String accessToken = getAccessToken();
