@@ -32,7 +32,7 @@ public class MsgHandler implements HttpHandler {
         String userId = arr[2];
         String html = msgTemplate.getMsgHtml(userId, msgId);
         if (StringUtils.isBlank(html)) {
-            html = "<p>消息还未生成</p>";
+            html = "<p>消息还未生成,请稍等几分钟后再刷新</p>";
         }
         byte[] buffer = html.getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().add("Content-Type", "text/html;charset=UTF-8");
