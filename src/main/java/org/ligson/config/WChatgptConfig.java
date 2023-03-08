@@ -6,7 +6,6 @@ import org.ligson.serializer.CruxSerializer;
 import org.ligson.serializer.jackson.JacksonSerializer;
 import org.ligson.util.MyHttpClient;
 import org.ligson.vo.AppConfig;
-import org.ligson.wx.WXClient;
 
 import java.io.IOException;
 
@@ -22,17 +21,7 @@ public class WChatgptConfig {
     }
 
     @BootBean
-    public CruxSerializer cruxSerializer() {
-        return new JacksonSerializer();
-    }
-
-    @BootBean
     public MyHttpClient myHttpClient() {
         return new MyHttpClient();
-    }
-
-    @BootBean
-    public WXClient wxClient() {
-        return new WXClient();
     }
 }
