@@ -31,7 +31,7 @@ public class MyHttpClient {
     private final CruxSerializer serializer;
 
     public MyHttpClient() {
-        this(Timeout.of(60, TimeUnit.SECONDS), Timeout.of(300, TimeUnit.SECONDS));
+        this(Timeout.of(200, TimeUnit.SECONDS), Timeout.of(300, TimeUnit.SECONDS));
     }
 
     public MyHttpClient(Timeout connectTimeout, Timeout socketTimeout) {

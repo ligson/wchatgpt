@@ -4,17 +4,18 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public class BootApplication {
-    private static BootApplication bootApplication;
-    private Map<String, BeanModel> beanContainer = new HashMap<>();
+public class BootApplicationContext {
+    private static BootApplicationContext bootApplicationContext;
+    private final Map<String, BeanModel> beanContainer = new ConcurrentHashMap<>();
 
-    public static BootApplication getInstance() {
-        if (bootApplication == null) {
-            bootApplication = new BootApplication();
+    public static BootApplicationContext getInstance() {
+        if (bootApplicationContext == null) {
+            bootApplicationContext = new BootApplicationContext();
         }
-        return bootApplication;
+        return bootApplicationContext;
     }
 
     public void putBean(String name, BeanModel beanModel) {
