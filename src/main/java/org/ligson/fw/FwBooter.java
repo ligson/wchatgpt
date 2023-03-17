@@ -73,22 +73,31 @@ public class FwBooter {
             }
             //config bean
             for (Class<?> configClass : configClasses) {
-                Object configInstance;
-                try {
-                    configInstance = configClass.getConstructor().newInstance();
-                } catch (Exception e) {
-                    log.error("配置类:{}实例化失败:{},stack:{}", configClass.getName(), e.getMessage(), ExceptionUtils.getStackTrace(e));
-                    throw new RuntimeException(e);
-                }
+                Object configInstance = beanLoader.instanceClass(configClass);
                 List<Method> methods = MethodUtils.getMethodsListWithAnnotation(configClass, BootBean.class);
                 for (Method method : methods) {
                     Object beanInstance;
-                    try {
-                        beanInstance = method.invoke(configInstance);
-                    } catch (Exception e) {
-                        log.error("配置类:{}调用方法:{}失败:{},stack:{}", configClass.getName(), method.toGenericString(), e.getMessage(), ExceptionUtils.getStackTrace(e));
-                        throw new RuntimeException(e);
+                    Class<?>[] paramTypes = method.getParameterTypes();
+                    if (paramTypes.length == 0) {
+                        try {
+                            beanInstance = method.invoke(configInstance);
+                        } catch (Exception e) {
+                            log.error("配置类:{}调用方法:{}失败:{},stack:{}", configClass.getName(), method.toGenericString(), e.getMessage(), ExceptionUtils.getStackTrace(e));
+                            throw new RuntimeException(e);
+                        }
+                    } else {
+                        Object[] paramValue = new Object[paramTypes.length];
+                        for (int i = 0; i < paramTypes.length; i++) {
+                            paramValue[i] = beanLoader.loadBean(paramTypes[i]);
+                        }
+                        try {
+                            beanInstance = method.invoke(configInstance, paramValue);
+                        } catch (Exception e) {
+                            log.error("配置类:{}调用方法:{}失败:{},stack:{}", configClass.getName(), method.toGenericString(), e.getMessage(), ExceptionUtils.getStackTrace(e));
+                            throw new RuntimeException(e);
+                        }
                     }
+
                     BeanModel beanModel = new BeanModel();
                     beanModel.setBeanInstance(beanInstance);
                     beanModel.setBeanType(beanInstance.getClass());

@@ -29,7 +29,7 @@ public class BeanLoader {
             for (Class<?> aClass : beanClasses) {
                 if (serviceClass.isAssignableFrom(aClass)) {
                     realServiceClass = aClass;
-                    continue;
+                    break;
                 }
             }
             if (realServiceClass == serviceClass) {
@@ -41,7 +41,7 @@ public class BeanLoader {
         return realServiceClass;
     }
 
-    private Object instanceClass(Class<?> realServiceClass) {
+    public Object instanceClass(Class<?> realServiceClass) {
         Object serviceInstance;
         Constructor<?>[] constructors = realServiceClass.getConstructors();
         if (constructors.length == 0) {
