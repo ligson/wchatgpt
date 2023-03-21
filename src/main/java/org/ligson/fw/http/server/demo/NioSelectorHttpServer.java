@@ -43,7 +43,7 @@ public class NioSelectorHttpServer {
         Selector selector = Selector.open();
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
         while (true) {
-            int select = selector.selectNow();
+            int select = selector.select(100);
             if (select == 0) {
                 continue;
             }
