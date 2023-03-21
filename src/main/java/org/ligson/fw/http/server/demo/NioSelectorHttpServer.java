@@ -15,6 +15,27 @@ import java.util.Set;
 
 @Slf4j
 public class NioSelectorHttpServer {
+
+    private static void processRead(Selector selector, SelectionKey key) throws Exception {
+        log.debug("key is read");
+        SocketChannel socketChannel = (SocketChannel) key.channel();
+        HttpRequestParser httpRequestParser = new HttpRequestParser(socketChannel.socket().getInputStream());
+        HttpRequest httpRequest = httpRequestParser.parse();
+        log.debug("http:{}", httpRequest);
+        //socketChannel.configureBlocking(false);
+        log.debug("isBlocking:{}", socketChannel.isBlocking());
+        socketChannel.register(selector, SelectionKey.OP_WRITE);
+    }
+
+    private static void processWrite(Selector selector, SelectionKey key) throws Exception {
+        log.debug("key is write");
+        SocketChannel socketChannel = (SocketChannel) key.channel();
+        HttpResponse httpResponse = new HttpResponse();
+        httpResponse.putHeader("Content-Type", "text/html");
+        httpResponse.write(socketChannel.socket().getOutputStream(), "<h1>test</h1>".getBytes());
+        socketChannel.close();
+    }
+
     public static void main(String[] args) throws Exception {
         ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.socket().bind(new InetSocketAddress(19999));
@@ -38,22 +59,10 @@ public class NioSelectorHttpServer {
                     socketChannel.register(selector, SelectionKey.OP_READ);
                 }
                 if (key.isReadable()) {
-                    log.debug("key is read");
-                    SocketChannel socketChannel = (SocketChannel) key.channel();
-                    HttpRequestParser httpRequestParser = new HttpRequestParser(socketChannel.socket().getInputStream());
-                    HttpRequest httpRequest = httpRequestParser.parse();
-                    log.debug("http:{}", httpRequest);
-                    //socketChannel.configureBlocking(false);
-                    log.debug("isBlocking:{}", socketChannel.isBlocking());
-                    socketChannel.register(selector, SelectionKey.OP_WRITE);
+                    processRead(selector, key);
                 }
                 if (key.isWritable()) {
-                    log.debug("key is write");
-                    SocketChannel socketChannel = (SocketChannel) key.channel();
-                    HttpResponse httpResponse = new HttpResponse();
-                    httpResponse.putHeader("Content-Type", "text/html");
-                    httpResponse.write(socketChannel.socket().getOutputStream(), "<h1>test</h1>".getBytes());
-                    socketChannel.close();
+                    processWrite(selector, key);
                 }
 
                 iterator.remove();
