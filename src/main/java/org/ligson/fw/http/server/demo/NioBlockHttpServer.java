@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ligson.fw.http.HttpRequest;
 import org.ligson.fw.http.HttpRequestParser;
 import org.ligson.fw.http.HttpResponse;
+import org.ligson.fw.http.enums.HttpStatus;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -26,8 +27,8 @@ public class NioBlockHttpServer {
             HttpRequestParser httpRequestParser = new HttpRequestParser();
             HttpRequest httpRequest = httpRequestParser.parse(client.socket().getInputStream());
             log.debug("http request:{}", httpRequest);
-            StringBuilder builder = new StringBuilder();
             HttpResponse httpResponse = new HttpResponse();
+            httpResponse.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
             httpResponse.putHeader("Content-Type", "text/html");
             httpResponse.write(client.socket().getOutputStream(), "<h1>test</h1>".getBytes());
             client.close();

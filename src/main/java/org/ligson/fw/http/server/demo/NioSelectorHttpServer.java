@@ -18,7 +18,7 @@ import java.util.Set;
 public class NioSelectorHttpServer {
 
     private static void processRead(Selector selector, SelectionKey key) throws Exception {
-        log.debug("key is read");
+        log.debug("key is read:{}",key.hashCode());
         SocketChannel socketChannel = (SocketChannel) key.channel();
         System.out.println("--" + socketChannel.isBlocking());
         HttpRequestParser httpRequestParser = new HttpRequestParser();
@@ -30,7 +30,7 @@ public class NioSelectorHttpServer {
     }
 
     private static void processWrite(Selector selector, SelectionKey key) throws Exception {
-        log.debug("key is write");
+        log.debug("key is write:{}",key.hashCode());
         SocketChannel socketChannel = (SocketChannel) key.channel();
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.putHeader("Content-Type", "text/html");
@@ -54,7 +54,7 @@ public class NioSelectorHttpServer {
             while (iterator.hasNext()) {
                 SelectionKey key = iterator.next();
                 if (key.isAcceptable()) {
-                    log.debug("key is accept");
+                    log.debug("key is accept:{}",key.hashCode());
                     SocketChannel socketChannel = serverSocketChannel.accept();
                     //SocketChannel socketChannel = serverSocketChannel.accept();
                     socketChannel.configureBlocking(false);

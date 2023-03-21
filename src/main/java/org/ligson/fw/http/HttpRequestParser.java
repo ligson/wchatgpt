@@ -60,7 +60,6 @@ public class HttpRequestParser {
         //https://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
         String line;
         while ((line = reader.readLine()) != null) {
-            System.out.println("---" + line + "---");
             if (!"".equals(line)) {
                 String[] arr2 = line.split(": ");
                 if (arr2.length == 2) {
