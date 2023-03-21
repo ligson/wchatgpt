@@ -20,8 +20,8 @@ public class SocketHttpServer {
         while (true) {
             Socket client = serverSocket.accept();
             OutputStream oos = client.getOutputStream();
-            HttpRequestParser httpRequestParser = new HttpRequestParser(client.getInputStream());
-            HttpRequest req = httpRequestParser.parse();
+            HttpRequestParser httpRequestParser = new HttpRequestParser();
+            HttpRequest req = httpRequestParser.parse(client.getInputStream());
             log.debug("http request:{}", req);
             String msg = "<h1>test</h1>";
             byte[] msgBuffer = msg.getBytes();

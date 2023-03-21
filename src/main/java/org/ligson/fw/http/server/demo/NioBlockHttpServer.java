@@ -23,8 +23,8 @@ public class NioBlockHttpServer {
 
         while (true) {
             SocketChannel client = serverSocketChannel.accept();
-            HttpRequestParser httpRequestParser = new HttpRequestParser(client.socket().getInputStream());
-            HttpRequest httpRequest = httpRequestParser.parse();
+            HttpRequestParser httpRequestParser = new HttpRequestParser();
+            HttpRequest httpRequest = httpRequestParser.parse(client.socket().getInputStream());
             log.debug("http request:{}", httpRequest);
             StringBuilder builder = new StringBuilder();
             HttpResponse httpResponse = new HttpResponse();

@@ -4,17 +4,28 @@ import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 @Data
 public class HttpRequestParser {
-    private InputStream inputStream;
 
-    public HttpRequestParser(InputStream inputStream) {
-        this.inputStream = inputStream;
+    public HttpRequest parse(SocketChannel socketChannel) throws IOException {
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        int len;
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        while ((len = socketChannel.read(buffer)) != -1) {
+            byte[] lineBuffer = new byte[len];
+            System.arraycopy(buffer.array(), 0, lineBuffer, 0, len);
+            bos.write(lineBuffer);
+            if (len < buffer.capacity()) {
+                break;
+            }
+        }
+        return convertHttpRequest(bos);
     }
 
-    public HttpRequest parse() throws IOException {
+    public HttpRequest parse(InputStream inputStream) throws IOException {
         byte[] buffer = new byte[1024];
         int len;
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -26,6 +37,10 @@ public class HttpRequestParser {
                 break;
             }
         }
+        return convertHttpRequest(bos);
+    }
+
+    private HttpRequest convertHttpRequest(ByteArrayOutputStream bos) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(bos.toByteArray())));
         String firstLine = reader.readLine();
         if (firstLine == null) {

@@ -6,6 +6,7 @@ import org.ligson.fw.http.HttpRequestParser;
 import org.ligson.fw.http.HttpResponse;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -19,8 +20,9 @@ public class NioSelectorHttpServer {
     private static void processRead(Selector selector, SelectionKey key) throws Exception {
         log.debug("key is read");
         SocketChannel socketChannel = (SocketChannel) key.channel();
-        HttpRequestParser httpRequestParser = new HttpRequestParser(socketChannel.socket().getInputStream());
-        HttpRequest httpRequest = httpRequestParser.parse();
+        System.out.println("--" + socketChannel.isBlocking());
+        HttpRequestParser httpRequestParser = new HttpRequestParser();
+        HttpRequest httpRequest = httpRequestParser.parse(socketChannel);
         log.debug("http:{}", httpRequest);
         //socketChannel.configureBlocking(false);
         log.debug("isBlocking:{}", socketChannel.isBlocking());
@@ -32,7 +34,7 @@ public class NioSelectorHttpServer {
         SocketChannel socketChannel = (SocketChannel) key.channel();
         HttpResponse httpResponse = new HttpResponse();
         httpResponse.putHeader("Content-Type", "text/html");
-        httpResponse.write(socketChannel.socket().getOutputStream(), "<h1>test</h1>".getBytes());
+        httpResponse.write(socketChannel, "<h1>test</h1>".getBytes());
         socketChannel.close();
     }
 

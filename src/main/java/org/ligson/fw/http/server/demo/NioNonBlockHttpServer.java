@@ -19,8 +19,8 @@ public class NioNonBlockHttpServer {
             if (sc == null) {
                 continue;
             }
-            HttpRequestParser httpRequestParser = new HttpRequestParser(sc.socket().getInputStream());
-            HttpRequest httpRequest = httpRequestParser.parse();
+            HttpRequestParser httpRequestParser = new HttpRequestParser();
+            HttpRequest httpRequest = httpRequestParser.parse(sc.socket().getInputStream());
             String msg = "<h1>xxx</h1>";
             log.debug("http:{}", httpRequest);
             StringBuilder builder = new StringBuilder();
