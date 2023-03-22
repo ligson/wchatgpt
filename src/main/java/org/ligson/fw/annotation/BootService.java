@@ -9,4 +9,6 @@ public @interface BootService {
     String name() default "";
 
     String initMethod() default "";
+
+    String destoryMethod() default "";
 }

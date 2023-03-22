@@ -3,7 +3,6 @@ package org.ligson.http;
 import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
 import org.ligson.fw.annotation.BootAutowired;
-import org.ligson.fw.annotation.BootService;
 import org.ligson.http.handler.MsgHandler;
 import org.ligson.http.handler.MsgImgHandler;
 import org.ligson.http.handler.TestHandler;
@@ -12,7 +11,7 @@ import org.ligson.vo.AppConfig;
 
 import java.net.InetSocketAddress;
 
-@BootService(initMethod = "init")
+//@BootService(initMethod = "init")
 @Slf4j
 public class SimpleHttpServer {
 

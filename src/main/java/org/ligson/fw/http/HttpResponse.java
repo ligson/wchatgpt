@@ -5,6 +5,7 @@ import org.ligson.fw.http.enums.HttpStatus;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -13,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HttpResponse {
     private final Map<String, HttpHeader> httpHeaderMap = new ConcurrentHashMap<>();
     private HttpStatus httpStatus = HttpStatus.OK;
+
+    private SelectionKey selectionKey;
 
     public void putHeader(String name, String value) {
         HttpHeader header = new HttpHeader(name, value);
@@ -33,6 +36,15 @@ public class HttpResponse {
         });
         builder.append("Content-Length: ").append(body.length).append("\r\n\r\n");
         return builder.toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    public void flush(){
+
+    }
+    public void write(byte[] body) throws IOException {
+        //
+        SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+        write(socketChannel, body);
     }
 
     public void write(OutputStream outputStream, byte[] body) throws IOException {
