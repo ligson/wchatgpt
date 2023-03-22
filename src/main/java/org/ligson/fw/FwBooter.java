@@ -4,16 +4,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.ligson.fw.annotation.*;
+import org.ligson.fw.annotation.BootApp;
+import org.ligson.fw.annotation.BootBean;
+import org.ligson.fw.annotation.BootConfig;
+import org.ligson.fw.annotation.BootService;
 import org.ligson.fw.util.BeanLoader;
 import org.ligson.fw.util.ClazzUtils;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class FwBooter {
@@ -77,7 +83,7 @@ public class FwBooter {
                 List<Method> methods = MethodUtils.getMethodsListWithAnnotation(configClass, BootBean.class);
                 for (Method method : methods) {
                     Object beanInstance;
-                    Class<?>[] paramTypes = method.getParameterTypes();
+                    Type[] paramTypes = method.getGenericParameterTypes();
                     if (paramTypes.length == 0) {
                         try {
                             beanInstance = method.invoke(configInstance);
@@ -88,7 +94,17 @@ public class FwBooter {
                     } else {
                         Object[] paramValue = new Object[paramTypes.length];
                         for (int i = 0; i < paramTypes.length; i++) {
-                            paramValue[i] = beanLoader.loadBean(paramTypes[i]);
+                            Type paramType = paramTypes[i];
+                            if (paramType instanceof ParameterizedType parameterizedType) {
+                                if (parameterizedType.getRawType() == List.class) {
+                                    Class<?> actualType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+                                    paramValue[i] = beanLoader.loadBeansBySupperClass(actualType).stream().map(BeanModel::getBeanInstance).collect(Collectors.toList());
+                                } else {
+                                    paramValue[i] = beanLoader.loadBean(parameterizedType.getRawType().getClass()).getBeanInstance();
+                                }
+                            }else{
+                                paramValue[i] = beanLoader.loadBean(paramType.getClass());
+                            }
                         }
                         try {
                             beanInstance = method.invoke(configInstance, paramValue);

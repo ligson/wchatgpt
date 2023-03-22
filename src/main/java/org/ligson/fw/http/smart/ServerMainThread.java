@@ -44,24 +44,33 @@ public class ServerMainThread implements Runnable {
         HttpRequestParser httpRequestParser = new HttpRequestParser();
         HttpRequest httpRequest = httpRequestParser.parse(socketChannel);
         HttpResponse httpResponse = new HttpResponse();
+        httpResponse.setSelectionKey(key);
         for (SmartServlet smartServlet : smartServletList) {
             if (smartServlet.match(httpRequest)) {
                 smartServlet.doService(httpRequest, httpResponse);
+                break;
             }
         }
-        log.debug("http:{}", httpRequest);
+
+        key.attach(httpResponse);
+        //log.debug("http:{}", httpRequest);
         //socketChannel.configureBlocking(false);
-        log.debug("isBlocking:{}", socketChannel.isBlocking());
-        socketChannel.register(selector, SelectionKey.OP_WRITE);
+        //log.debug("isBlocking:{}", socketChannel.isBlocking());
+        //socketChannel.register(selector, SelectionKey.OP_WRITE);
     }
 
     private void processWrite(Selector selector, SelectionKey key) throws IOException {
         log.debug("key is write:{}", key.hashCode());
         SocketChannel socketChannel = (SocketChannel) key.channel();
-        HttpResponse httpResponse = new HttpResponse();
-        httpResponse.putHeader("Content-Type", "text/html");
-        httpResponse.write(socketChannel, "<h1>test</h1>".getBytes());
-        socketChannel.close();
+        //HttpResponse httpResponse = new HttpResponse();
+        //httpResponse.putHeader("Content-Type", "text/html");
+        //httpResponse.write(socketChannel, "<h1>test</h1>".getBytes());
+        //socketChannel.close();
+        HttpResponse httpResponse = (HttpResponse) key.attachment();
+        if (httpResponse != null) {
+            httpResponse.flush();
+            socketChannel.close();
+        }
     }
 
     private void processSelector(Set<SelectionKey> selectKeys, Selector selector) {

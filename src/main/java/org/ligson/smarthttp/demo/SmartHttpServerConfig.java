@@ -1,7 +1,9 @@
-package org.ligson.fw.http.smart;
+package org.ligson.smarthttp.demo;
 
 import org.ligson.fw.annotation.BootBean;
 import org.ligson.fw.annotation.BootConfig;
+import org.ligson.fw.http.smart.SmartHttpServer;
+import org.ligson.fw.http.smart.SmartServlet;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

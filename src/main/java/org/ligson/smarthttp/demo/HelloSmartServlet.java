@@ -1,9 +1,10 @@
-package org.ligson.fw.http.smart;
+package org.ligson.smarthttp.demo;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ligson.fw.annotation.BootService;
 import org.ligson.fw.http.HttpRequest;
 import org.ligson.fw.http.HttpResponse;
+import org.ligson.fw.http.smart.SmartServlet;
 
 import java.io.IOException;
 

@@ -11,6 +11,8 @@ import org.ligson.fw.annotation.BootService;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -27,7 +29,7 @@ public class BeanLoader {
         Class<?> realServiceClass = serviceClass;
         if (serviceClass.isInterface()) {
             for (Class<?> aClass : beanClasses) {
-                if (serviceClass.isAssignableFrom(aClass)) {
+                if (serviceClass.isAssignableFrom(aClass)&&(serviceClass!=aClass)) {
                     realServiceClass = aClass;
                     break;
                 }
@@ -117,6 +119,19 @@ public class BeanLoader {
         }
     }
 
+    public List<BeanModel> loadBeansBySupperClass(Class<?> supperServiceClass){
+        List<Class<?>> realServiceClasses = new ArrayList<>();
+        for (Class<?> aClass : beanClasses) {
+            if (supperServiceClass.isAssignableFrom(aClass)&&aClass!=supperServiceClass) {
+                realServiceClasses.add(aClass);
+            }
+        }
+        List<BeanModel> beanModels = new ArrayList<>();
+        for (Class<?> realServiceClass : realServiceClasses) {
+            beanModels.add(loadBean(realServiceClass));
+        }
+        return beanModels;
+    }
     public BeanModel loadBean(Class<?> serviceClass) {
         BeanModel bm1 = bootApplicationContext.getOneBeanByClass(serviceClass);
         if (bm1 != null) {

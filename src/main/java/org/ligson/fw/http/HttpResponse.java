@@ -2,6 +2,7 @@ package org.ligson.fw.http;
 
 import org.ligson.fw.http.enums.HttpStatus;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -16,6 +17,13 @@ public class HttpResponse {
     private HttpStatus httpStatus = HttpStatus.OK;
 
     private SelectionKey selectionKey;
+    private final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+
+    private boolean firstWrite = false;
+
+    public void setSelectionKey(SelectionKey selectionKey) {
+        this.selectionKey = selectionKey;
+    }
 
     public void putHeader(String name, String value) {
         HttpHeader header = new HttpHeader(name, value);
@@ -28,7 +36,7 @@ public class HttpResponse {
 
     private byte[] buildHeader(byte[] body) {
         StringBuilder builder = new StringBuilder();
-        builder.append("HTTP/1.1 " + httpStatus.toString() + "\r\n");
+        builder.append("HTTP/1.1 ").append(httpStatus.toString()).append("\r\n");
         httpHeaderMap.forEach((k, v) -> {
             if (!k.equals("Content-Length")) {
                 builder.append(k).append(": ").append(v.getValue()).append("\r\n");
@@ -38,13 +46,27 @@ public class HttpResponse {
         return builder.toString().getBytes(StandardCharsets.UTF_8);
     }
 
-    public void flush(){
-
-    }
-    public void write(byte[] body) throws IOException {
-        //
+    public void flush() throws IOException {
+        if (selectionKey == null) {
+            return;
+        }
         SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
-        write(socketChannel, body);
+        byte[] buffer = bos.toByteArray();
+        byte[] headerBytes = buildHeader(buffer);
+        socketChannel.write(ByteBuffer.wrap(headerBytes));
+        socketChannel.write(ByteBuffer.wrap(buffer));
+    }
+
+    public void write(byte[] body) throws IOException {
+        if (selectionKey == null) {
+            throw new IOException("请先设置selectionKey");
+        }
+        if (!firstWrite) {
+            SocketChannel socketChannel = (SocketChannel) selectionKey.channel();
+            socketChannel.register(selectionKey.selector(), SelectionKey.OP_WRITE);
+            firstWrite = true;
+        }
+        bos.write(body);
     }
 
     public void write(OutputStream outputStream, byte[] body) throws IOException {
