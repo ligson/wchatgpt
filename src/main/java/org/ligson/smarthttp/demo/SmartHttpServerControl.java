@@ -5,7 +5,7 @@ import org.ligson.fw.annotation.BootAutowired;
 import org.ligson.fw.annotation.BootService;
 import org.ligson.fw.http.smart.SmartHttpServer;
 
-@BootService(initMethod = "init", destoryMethod = "stop")
+//@BootService(initMethod = "init", destoryMethod = "stop")
 public class SmartHttpServerControl {
     @BootAutowired
     private SmartHttpServer smartHttpServer;

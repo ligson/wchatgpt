@@ -92,7 +92,7 @@ public class WxHandler implements HttpHandler {
         long startTime = System.currentTimeMillis();
         ReplyMsg replyMsg = new ReplyMsg();
         // 定义超时时间为3秒
-        long timeout = 4800;
+        long timeout = 4000;
         // 创建一个新的线程池，用于执行要限制时间的方法
         CompletionService<String> completionService = new ExecutorCompletionService<>(executor);
         Future<String> future = completionService.submit(() -> replyThread(question));
@@ -137,7 +137,7 @@ public class WxHandler implements HttpHandler {
     private String imgMsg(ReceivingStdMsgVo receivingStdMsgVo, HttpExchange exchange) throws IOException {
         String con = receivingStdMsgVo.getContent().replaceFirst(appConfig.getApp().getOpenai().getKeyword(), "");
         // 定义超时时间为3秒
-        long timeout = 4800;
+        long timeout = 4000;
         // 创建一个新的线程池，用于执行要限制时间的方法
         CompletionService<List<String>> completionService = new ExecutorCompletionService<>(executor);
         Future<List<String>> future = completionService.submit(() -> replyImgThread(receivingStdMsgVo.getContent()));

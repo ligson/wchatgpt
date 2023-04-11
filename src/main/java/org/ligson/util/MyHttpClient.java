@@ -10,6 +10,8 @@ import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.BasicHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.util.Timeout;
@@ -35,9 +37,12 @@ public class MyHttpClient {
     }
 
     public MyHttpClient(Timeout connectTimeout, Timeout socketTimeout) {
-        BasicHttpClientConnectionManager connectionManager = new BasicHttpClientConnectionManager();
         ConnectionConfig connectionConfig = ConnectionConfig.custom().setConnectTimeout(connectTimeout).setSocketTimeout(socketTimeout).build();
-        connectionManager.setConnectionConfig(connectionConfig);
+        PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                .setMaxConnTotal(200)
+                .setMaxConnPerRoute(100)
+                .setDefaultConnectionConfig(connectionConfig)
+                .build();
         httpClient = HttpClientBuilder.create().setConnectionManager(connectionManager).build();
         serializer = new JacksonSerializer();
     }
