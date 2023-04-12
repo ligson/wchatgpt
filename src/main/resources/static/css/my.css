@@ -54,7 +54,7 @@ html, body {
     display: flex;
     flex-direction: column;
     padding: 5px;
-    overflow: scroll;
+    /*overflow: scroll;*/
     margin-top: 5px;
 }
 
