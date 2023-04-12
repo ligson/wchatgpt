@@ -1,5 +1,5 @@
 package org.ligson.chat;
 
 public interface ChatService {
-    String chat(String question);
+    String chat(String contextId,String question);
 }

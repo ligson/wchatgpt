@@ -4,10 +4,7 @@ import com.sun.net.httpserver.HttpServer;
 import lombok.extern.slf4j.Slf4j;
 import org.ligson.fw.annotation.BootAutowired;
 import org.ligson.fw.annotation.BootService;
-import org.ligson.http.handler.MsgHandler;
-import org.ligson.http.handler.MsgImgHandler;
-import org.ligson.http.handler.TestHandler;
-import org.ligson.http.handler.WxHandler;
+import org.ligson.http.handler.*;
 import org.ligson.vo.AppConfig;
 
 import java.net.InetSocketAddress;
@@ -28,14 +25,20 @@ public class SimpleHttpServer {
 
     @BootAutowired
     private TestHandler testHandler;
+    @BootAutowired
+    private StaticHandler staticHandler;
+    @BootAutowired
+    private ChatHandler chatHandler;
 
     public void init() throws Exception {
         httpServer = HttpServer.create(new InetSocketAddress(appConfig.getApp().getServer().getPort()), 100);
 
+        httpServer.createContext("/static", staticHandler);
         httpServer.createContext("/test", testHandler);
         httpServer.createContext("/auth", wxHandler);
         httpServer.createContext("/msg", msgHandler);
         httpServer.createContext("/msg-img", msgImgHandler);
+        httpServer.createContext("/chat", chatHandler);
         Thread thread = new Thread(this::close);
         Runtime.getRuntime().addShutdownHook(thread);
 

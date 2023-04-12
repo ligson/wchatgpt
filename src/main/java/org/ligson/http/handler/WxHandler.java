@@ -67,15 +67,15 @@ public class WxHandler implements HttpHandler {
         return openAIChatService.imageGenerate(str);
     }
 
-    private String replyThread(String str) {
+    private String replyThread(String contextId,String str) {
         String content = null;
         if (!StringUtils.isBlank(str)) {
             if (str.startsWith(appConfig.getApp().getTuring().getKeyword())) {
                 String con = str.replaceFirst(appConfig.getApp().getTuring().getKeyword(), "");
-                content = turingChatService.chat(con);
+                content = turingChatService.chat(contextId,con);
             } else if (str.startsWith(appConfig.getApp().getOpenai().getKeyword())) {
                 String con = str.replaceFirst(appConfig.getApp().getOpenai().getKeyword(), "");
-                content = openAIChatService.chat(con);
+                content = openAIChatService.chat(contextId,con);
             } else {
                 content = "消息开头" + appConfig.getApp().getTuring().getKeyword() + ",会使用图灵机器人;" + "消息开头" + appConfig.getApp().getOpenai().getKeyword() + ",会使用OpenAI机器人;5s没有返回或者服务器错误请重试。";
             }
@@ -95,7 +95,7 @@ public class WxHandler implements HttpHandler {
         long timeout = 4000;
         // 创建一个新的线程池，用于执行要限制时间的方法
         CompletionService<String> completionService = new ExecutorCompletionService<>(executor);
-        Future<String> future = completionService.submit(() -> replyThread(question));
+        Future<String> future = completionService.submit(() -> replyThread(toUser,question));
         try {
             Future<String> result = completionService.poll(timeout, TimeUnit.MILLISECONDS);
             if (result == null) {

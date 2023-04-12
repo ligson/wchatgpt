@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 public class CompletionsReq {
-    private String model;
+    private String model = "text-davinci-003";
     @JsonProperty("max_tokens")
     private int maxTokens = 2000;
     private String prompt;

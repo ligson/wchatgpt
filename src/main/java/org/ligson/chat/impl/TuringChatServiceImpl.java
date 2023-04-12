@@ -33,7 +33,7 @@ public class TuringChatServiceImpl implements ChatService {
     }
 
     @Override
-    public String chat(String question) {
+    public String chat(String contextId,String question) {
         if (StringUtils.isBlank(question)) {
             return null;
         }

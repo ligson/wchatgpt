@@ -8,6 +8,7 @@ import org.ligson.fw.annotation.BootService;
 import org.ligson.openai.OpenAiClient;
 import org.ligson.openai.vo.req.CompletionsReq;
 import org.ligson.openai.vo.req.ImgGenReq;
+import org.ligson.openai.vo.req.ReqContext;
 import org.ligson.openai.vo.res.Choice;
 import org.ligson.openai.vo.res.CompletionsRes;
 import org.ligson.openai.vo.res.ImgGenData;
@@ -41,14 +42,7 @@ public class OpenAIChatServiceImpl implements ChatService {
         log.debug("openAiClient is :{}", this.openAiClient.hashCode());
     }
 
-    @Override
-    public String chat(String question) {
-        if (StringUtils.isBlank(question)) {
-            return null;
-        }
-        CompletionsReq completionsReq = new CompletionsReq();
-        completionsReq.setModel("text-davinci-003");
-        completionsReq.setPrompt(question);
+    public String chat(CompletionsReq completionsReq) {
         CompletionsRes res = openAiClient.completions(completionsReq);
         if (res != null) {
             if (!res.getChoices().isEmpty()) {
@@ -60,6 +54,22 @@ public class OpenAIChatServiceImpl implements ChatService {
             }
         }
         return null;
+    }
+
+    @Override
+    public String chat(String contextId, String question) {
+        if (StringUtils.isBlank(question)) {
+            return null;
+        }
+        CompletionsReq completionsReq = new CompletionsReq();
+        completionsReq.setModel("text-davinci-003");
+        completionsReq.setPrompt(question);
+        if (StringUtils.isNotBlank(contextId)) {
+            ReqContext reqContext = new ReqContext();
+            reqContext.setConversationId(contextId);
+            //completionsReq.setContext(reqContext);
+        }
+        return chat(completionsReq);
     }
 
     public List<String> imageGenerate(String str) {
