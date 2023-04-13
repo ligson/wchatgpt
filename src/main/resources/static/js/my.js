@@ -4,7 +4,7 @@ function req_msg(msg) {
         method: "POST",
         dataType: "json",
         contentType: "application/json",
-        data: JSON.stringify({ prompt: msg }),
+        data: JSON.stringify({ messages: [{ content: msg, role: "user" }] }),
         success: function (data) {
             if (data.success) {
                 let converter = new showdown.Converter();

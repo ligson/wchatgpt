@@ -29,6 +29,8 @@ public class SimpleHttpServer {
     private StaticHandler staticHandler;
     @BootAutowired
     private ChatHandler chatHandler;
+    @BootAutowired
+    private ModelsHandler modelsHandler;
 
     public void init() throws Exception {
         httpServer = HttpServer.create(new InetSocketAddress(appConfig.getApp().getServer().getPort()), 100);
@@ -39,6 +41,7 @@ public class SimpleHttpServer {
         httpServer.createContext("/msg", msgHandler);
         httpServer.createContext("/msg-img", msgImgHandler);
         httpServer.createContext("/chat", chatHandler);
+        httpServer.createContext("/models", modelsHandler);
         Thread thread = new Thread(this::close);
         Runtime.getRuntime().addShutdownHook(thread);
 

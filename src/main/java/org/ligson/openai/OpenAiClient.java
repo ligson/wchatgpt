@@ -5,8 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.message.BasicHeader;
 import org.ligson.openai.vo.ModelResult;
+import org.ligson.openai.vo.req.ChatCompletionsReq;
 import org.ligson.openai.vo.req.CompletionsReq;
 import org.ligson.openai.vo.req.ImgGenReq;
+import org.ligson.openai.vo.res.ChatCompletionsRes;
 import org.ligson.openai.vo.res.CompletionsRes;
 import org.ligson.openai.vo.res.ImgGenRes;
 import org.ligson.serializer.CruxSerializer;
@@ -34,6 +36,15 @@ public class OpenAiClient {
             return myHttpClient.doGet(BASE_URL + "/v1/models", List.of(authHeader), ModelResult.class);
         } catch (Exception e) {
             log.error("获取模型失败:" + e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public ChatCompletionsRes chatCompletions(ChatCompletionsReq req) {
+        try {
+            return myHttpClient.doPost(BASE_URL + "/v1/chat/completions", List.of(authHeader, jsonHeader), req, ChatCompletionsRes.class);
+        } catch (Exception e) {
+            log.error("请求问答失败:" + e.getMessage(), e);
             return null;
         }
     }

@@ -6,13 +6,13 @@ import org.ligson.chat.ChatService;
 import org.ligson.fw.annotation.BootAutowired;
 import org.ligson.fw.annotation.BootService;
 import org.ligson.openai.OpenAiClient;
+import org.ligson.openai.vo.Model;
+import org.ligson.openai.vo.ModelResult;
+import org.ligson.openai.vo.req.ChatCompletionsReq;
 import org.ligson.openai.vo.req.CompletionsReq;
 import org.ligson.openai.vo.req.ImgGenReq;
 import org.ligson.openai.vo.req.ReqContext;
-import org.ligson.openai.vo.res.Choice;
-import org.ligson.openai.vo.res.CompletionsRes;
-import org.ligson.openai.vo.res.ImgGenData;
-import org.ligson.openai.vo.res.ImgGenRes;
+import org.ligson.openai.vo.res.*;
 import org.ligson.serializer.CruxSerializer;
 import org.ligson.util.MyHttpClient;
 import org.ligson.vo.AppConfig;
@@ -42,13 +42,18 @@ public class OpenAIChatServiceImpl implements ChatService {
         log.debug("openAiClient is :{}", this.openAiClient.hashCode());
     }
 
-    public String chat(CompletionsReq completionsReq) {
-        CompletionsRes res = openAiClient.completions(completionsReq);
+    public List<String> models() {
+        ModelResult result = openAiClient.models();
+        return result.getData().stream().map(Model::getId).collect(Collectors.toList());
+    }
+
+    public String chat(ChatCompletionsReq completionsReq) {
+        ChatCompletionsRes res = openAiClient.chatCompletions(completionsReq);
         if (res != null) {
             if (!res.getChoices().isEmpty()) {
                 StringBuilder stringBuffer = new StringBuilder();
-                for (Choice choice : res.getChoices()) {
-                    stringBuffer.append(choice.getText());
+                for (ChatChoice choice : res.getChoices()) {
+                    stringBuffer.append(choice.getMessage().getContent());
                 }
                 return stringBuffer.toString();
             }
@@ -69,7 +74,17 @@ public class OpenAIChatServiceImpl implements ChatService {
             reqContext.setConversationId(contextId);
             //completionsReq.setContext(reqContext);
         }
-        return chat(completionsReq);
+        CompletionsRes res = openAiClient.completions(completionsReq);
+        if (res != null) {
+            if (!res.getChoices().isEmpty()) {
+                StringBuilder stringBuffer = new StringBuilder();
+                for (Choice choice : res.getChoices()) {
+                    stringBuffer.append(choice.getText());
+                }
+                return stringBuffer.toString();
+            }
+        }
+        return null;
     }
 
     public List<String> imageGenerate(String str) {
