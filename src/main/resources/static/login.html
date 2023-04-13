@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <title>用户登录页面</title>
+    <link rel="stylesheet" href="/static/css/login.css">
+</head>
+<body>
+<form action="" method="get">
+    <div class="box2">
+        <div class="register_mark">
+            <div class="user_register">登录GPT</div>
+            <div class="mark_files">
+                <p>手机号或者邮箱登录</p>
+            </div>
+            <div class="input_mark">
+                <input type="text" name="username" placeholder="请输入手机号或邮箱">
+            </div>
+            <div class="input_mark">
+                <input type="password" name="password" placeholder="请输入密码">
+            </div>
+            <button type="button" id="loginButton">完 成 登 录</button>
+            <div class="mark">
+                <p>没有账号？<a href="/static/register.html">立即注册</a></p>
+            </div>
+            <div class="other_login">
+                <div class="form-others-title">
+                    <div class="mlr10 fs14">————————— 其他登录方式 —————————</div>
+                    <div class="img_list">
+                        <div class="img_png">
+                            <p class="ut-01">
+                                <a href="#">
+                                    <img src="/static/img/qq.png" alt="qq登录">
+                                </a>
+                            </p>
+                        </div>
+                        <div class="img_png1">
+                            <p class="ut-02">
+                                <a href="#">
+                                    <img src="/static/img/wx.png" alt="wx登录">
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("button").click(function(){
+            console.log("111");
+            var username = $("input[name='username']").val();
+            var password = $("input[name='password']").val();
+            $.ajax({
+                type: "POST",
+                url: '/login',
+                dataType: 'text',
+                async: false,
+                data: '{"username": "' + username + '", "password" : "' + password + '"}',
+                success: function (data) {
+                    alert("Data: " + data);
+                    window.location = "/static/index.html";
+                }
+            });
+            alert("欢迎登录！！！")
+        });
+    });
+
+
+</script>
+</body>
+</html>
