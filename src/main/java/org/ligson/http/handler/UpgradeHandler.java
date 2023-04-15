@@ -43,7 +43,7 @@ public class UpgradeHandler implements HttpHandler {
         Map<String, Object> result = new HashMap<>();
         if ("post".equalsIgnoreCase(exchange.getRequestMethod())) {
             RegisterDTO req = cruxSerializer.deserialize(IOUtils.toString(exchange.getRequestBody(), StandardCharsets.UTF_8), RegisterDTO.class);
-            if (StringUtils.isNotBlank(req.getUsername()) && StringUtils.isNotBlank(req.getPassword()) && StringUtils.isNotBlank(req.getRegisterCode())) {
+            if (StringUtils.isNotBlank(req.getUsername()) && StringUtils.isNotBlank(req.getRegisterCode())) {
                 String registerCode = appConfig.getApp().getServer().getRegisterCode();
                 if (!registerCode.equals(req.getRegisterCode())) {
                     result.put("success", false);
@@ -60,20 +60,13 @@ public class UpgradeHandler implements HttpHandler {
                     return;
                 }
 
-                Matcher passwordMatcher = PASSWORD_PATTERN.matcher(req.getPassword());
-                if (!passwordMatcher.matches()) {
-                    result.put("success", false);
-                    result.put("msg", "密码格式错误!");
-                    httpServerResponseConverter.processResult(result, exchange);
-                    return;
-                }
-
                 result = serverUserContext.upgrade(req.getUsername());
                 httpServerResponseConverter.processResult(result, exchange);
                 return;
             } else {
                 result.put("success", false);
                 result.put("msg", "参数格式错误!");
+                httpServerResponseConverter.processResult(result, exchange);
                 return;
             }
         }
