@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <!-- 引入组件库 -->
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="js/lib/jquery.min.js"></script>
     <title>用户注册页面</title>
     <link rel="stylesheet" href="/static/css/login.css">
 </head>
@@ -27,7 +27,7 @@
                 <input type="text" name="nickname" placeholder="请输入姓名">
             </div>
             <div class="input_mark">
-                <input type="password" placeholder="请输入密码">
+                <input type="password" name="password" placeholder="请输入密码">
             </div>
             <button type="button">完 成 注 册</button>
 
@@ -78,16 +78,14 @@
                 async: false,
                 data: '{"username": "' + username + '", "password" : "' + password + '", "nickname" : "' + nickname + '"}',
                 success: function (data) {
-                    alert("Data: " + data);
+                    alert("注册成功!");
                     window.location = "/static/login.html";
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     /*错误信息处理*/
                     console.log(textStatus + ":" + errorThrown);
                 }
-
             });
-            alert("欢迎登录！！！")
         });
     });
 </script>

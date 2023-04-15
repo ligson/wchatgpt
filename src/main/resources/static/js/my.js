@@ -3,6 +3,7 @@ function req_msg(msg) {
         url: "/chat",
         method: "POST",
         dataType: "json",
+        headers: { 'token': localStorage.getItem("token") },
         contentType: "application/json",
         data: JSON.stringify({ messages: [{ content: msg, role: "user" }] }),
         success: function (data) {
