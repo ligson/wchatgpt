@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="js/lib/jquery.min.js"></script>
+    <title>用户登录页面</title>
+    <link rel="stylesheet" href="/static/css/login.css">
+</head>
+<body>
+<form action="" method="get">
+    <div class="box2">
+        <div class="register_mark">
+            <div class="user_register">登录GPT</div>
+            <div class="mark_files">
+                <p>账号</p>
+            </div>
+            <div class="input_mark">
+                <input type="text" name="username" placeholder="请输入账号">
+            </div>
+            <div class="input_mark">
+                <input type="password" name="password" placeholder="请输入密码">
+            </div>
+            <button type="button" id="loginButton">完 成 登 录</button>
+            <div class="mark">
+                <p>没有账号？联系管理员</p>
+            </div>
+            <div class="other_login">
+                <div class="form-others-title">
+                    <div class="mlr10 fs14">————————— 其他登录方式 —————————</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#loginButton").click(function () {
+            console.log("111");
+            let username = $("input[name='username']").val();
+            let password = $("input[name='password']").val();
+            if (!username || !password) {
+                alert("请输入用户名或者密码")
+                return
+            }
+            $.ajax({
+                type: "POST",
+                url: '/login',
+                dataType: 'json',
+                data: JSON.stringify({ username: username, password: password }),
+                success: function (data) {
+                    if (data.success) {
+                        localStorage.setItem("userInfo", data.username);
+                        localStorage.setItem("token", data.token);
+                        window.location = "/static/index.html";
+                    } else {
+                        localStorage.removeItem("userInfo");
+                        localStorage.removeItem("token");
+                        alert(data.msg)
+                    }
+                }
+            });
+        });
+    });
+
+
+</script>
+</body>
+</html>

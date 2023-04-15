@@ -95,14 +95,15 @@ public class FwBooter {
                         Object[] paramValue = new Object[paramTypes.length];
                         for (int i = 0; i < paramTypes.length; i++) {
                             Type paramType = paramTypes[i];
-                            if (paramType instanceof ParameterizedType parameterizedType) {
+                            if (paramType instanceof ParameterizedType) {
+                                ParameterizedType parameterizedType = (ParameterizedType) paramType;
                                 if (parameterizedType.getRawType() == List.class) {
                                     Class<?> actualType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
                                     paramValue[i] = beanLoader.loadBeansBySupperClass(actualType).stream().map(BeanModel::getBeanInstance).collect(Collectors.toList());
                                 } else {
                                     paramValue[i] = beanLoader.loadBean(parameterizedType.getRawType().getClass()).getBeanInstance();
                                 }
-                            }else{
+                            } else {
                                 paramValue[i] = beanLoader.loadBean(paramType.getClass());
                             }
                         }
