@@ -1,14 +1,14 @@
 package org.ligson.http.handler;
 
-import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.ligson.chat.impl.OpenAIChatServiceImpl;
-import org.ligson.constant.Constant;
 import org.ligson.fw.annotation.BootAutowired;
 import org.ligson.fw.annotation.BootService;
 import org.ligson.http.HttpServerResponseConverter;
+import org.ligson.http.ServerUserContext;
 import org.ligson.openai.vo.req.ChatCompletionsReq;
 import org.ligson.serializer.CruxSerializer;
 
@@ -25,13 +25,15 @@ public class ChatHandler implements HttpHandler {
     private OpenAIChatServiceImpl openAIChatService;
     @BootAutowired
     private HttpServerResponseConverter httpServerResponseConverter;
+    @BootAutowired
+    private ServerUserContext serverUserContext;
 
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         Map<String, Object> result = new HashMap<>();
-        Headers requestHeaders = exchange.getRequestHeaders();
-        if (requestHeaders.get("token") == null || Constant.TOKEN_MAP.get(requestHeaders.get("token").get(0)) == null) {
+        String token = exchange.getRequestHeaders().get("token").get(0);
+        if (StringUtils.isBlank(token) || serverUserContext.getLoginUserByToken(token) == null) {
             result.put("success", true);
             result.put("msg", "您的登录会话已经过期，请重新登录!");
             httpServerResponseConverter.processResult(result, exchange);

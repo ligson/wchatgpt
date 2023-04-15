@@ -9,14 +9,14 @@
     <!-- 引入组件库 -->
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <script src="js/lib/jquery.min.js"></script>
-    <title>用户注册页面</title>
+    <title>升级用户</title>
     <link rel="stylesheet" href="/static/css/login.css">
 </head>
 <body>
 <form action="" method="get">
     <div class="box2">
         <div class="register_mark">
-            <div class="user_register">注册GPT</div>
+            <div class="user_register">升级用户</div>
             <div class="mark_files">
                 <p>账号</p>
             </div>
@@ -24,28 +24,9 @@
                 <input type="text" name="username" placeholder="请输入账号">
             </div>
             <div class="input_mark">
-                <input type="password" name="password" placeholder="请输入密码">
-            </div>
-            <div class="input_mark">
-                <input type="password" name="password2" placeholder="请再次输入密码">
-            </div>
-            <div class="input_mark">
                 <input type="text" name="register_code" placeholder="注册码">
             </div>
-            <button type="button">完 成 注 册</button>
-
-            <div class="pact_mark">
-                <input type="checkbox" value="1"/>同意
-                <a href="#">用户服务协议</a>
-            </div>
-            <div class="mark">
-                <p>已有账号？<a href="/static/login.html">立即登录</a></p>
-            </div>
-            <div class="other_login">
-                <div class="form-others-title">
-                    <div class="mlr10 fs14">————————— 其他登录方式 —————————</div>
-                </div>
-            </div>
+            <button type="button">完 成</button>
         </div>
     </div>
 </form>
@@ -61,17 +42,7 @@
                 alert("账号必须时小写英文和数字,长度6到12位")
                 return
             }
-            let password = $("input[name='password']").val();
-            let password2 = $("input[name='password2']").val();
-            let pwdReg = /^[a-z0-9_]{8,}$/
-            if (!pwdReg.test(password)) {
-                alert("密码必须时小写英文和数字,长度至少8位")
-                return
-            }
-            if (password !== password2) {
-                alert("两次密码输入不一致")
-                return
-            }
+
             let register_code = $("input[name='register_code']").val();
             if (!register_code) {
                 alert("请输入注册码!")
@@ -80,15 +51,15 @@
 
             $.ajax({
                 type: "POST",
-                url: '/register',
+                url: '/upgrade',
                 contentType: "application/json",
                 dataType: 'json',
-                data: JSON.stringify({ username: username, password: password, register_code: register_code }),
+                data: JSON.stringify({ username: username, register_code: register_code }),
                 success: function (data) {
                     if (data.success) {
-                        alert("注册成功!");
+                        alert("升级成功!");
                     } else {
-                        alert("注册失败," + data.msg);
+                        alert("升级失败," + data.msg);
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {

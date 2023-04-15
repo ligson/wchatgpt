@@ -10,8 +10,7 @@ import org.ligson.fw.annotation.BootService;
 import org.ligson.http.HttpServerResponseConverter;
 import org.ligson.http.ServerUserContext;
 import org.ligson.serializer.CruxSerializer;
-import org.ligson.vo.AppConfig;
-import org.ligson.vo.RegisterDTO;
+import org.ligson.vo.ResetPwdDTO;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -22,16 +21,13 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @BootService
-public class RegisterHandler implements HttpHandler {
+public class ResetPwdHandler implements HttpHandler {
     private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-z0-9]{6,12}$");
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^[a-z0-9_]{8,}$");
 
 
     @BootAutowired
     private CruxSerializer cruxSerializer;
-
-    @BootAutowired
-    private AppConfig appConfig;
 
     @BootAutowired
     private HttpServerResponseConverter httpServerResponseConverter;
@@ -42,33 +38,17 @@ public class RegisterHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         Map<String, Object> result = new HashMap<>();
         if ("post".equalsIgnoreCase(exchange.getRequestMethod())) {
-            RegisterDTO req = cruxSerializer.deserialize(IOUtils.toString(exchange.getRequestBody(), StandardCharsets.UTF_8), RegisterDTO.class);
-            if (StringUtils.isNotBlank(req.getUsername()) && StringUtils.isNotBlank(req.getPassword()) && StringUtils.isNotBlank(req.getRegisterCode())) {
-                String registerCode = appConfig.getApp().getServer().getRegisterCode();
-                if (!registerCode.equals(req.getRegisterCode())) {
-                    result.put("success", false);
-                    result.put("msg", "注册码错误!");
-                    httpServerResponseConverter.processResult(result, exchange);
-                    return;
-                }
+            ResetPwdDTO req = cruxSerializer.deserialize(IOUtils.toString(exchange.getRequestBody(), StandardCharsets.UTF_8), ResetPwdDTO.class);
+            if (StringUtils.isNotBlank(req.getUsername()) && StringUtils.isNotBlank(req.getOldPassword()) && StringUtils.isNotBlank(req.getNewPassword())) {
 
-                Matcher usernameMatcher = USERNAME_PATTERN.matcher(req.getUsername());
-                if (!usernameMatcher.matches()) {
-                    result.put("success", false);
-                    result.put("msg", "账号格式错误!");
-                    httpServerResponseConverter.processResult(result, exchange);
-                    return;
-                }
-
-                Matcher passwordMatcher = PASSWORD_PATTERN.matcher(req.getPassword());
+                Matcher passwordMatcher = PASSWORD_PATTERN.matcher(req.getNewPassword());
                 if (!passwordMatcher.matches()) {
                     result.put("success", false);
                     result.put("msg", "密码格式错误!");
                     httpServerResponseConverter.processResult(result, exchange);
                     return;
                 }
-
-                result = serverUserContext.registerUser(req.getUsername(), req.getPassword(), "1");
+                result = serverUserContext.resetPassword(req.getUsername(), req.getOldPassword(), req.getNewPassword());
                 httpServerResponseConverter.processResult(result, exchange);
                 return;
             } else {

@@ -37,6 +37,10 @@ public class SimpleHttpServer {
     private RegisterHandler registerHandler;
     @BootAutowired
     private CheckLoginHandler checkLoginHandler;
+    @BootAutowired
+    ResetPwdHandler resetPwdHandler;
+    @BootAutowired
+    UpgradeHandler upgradeHandler;
 
     public void init() throws Exception {
         httpServer = HttpServer.create(new InetSocketAddress(appConfig.getApp().getServer().getPort()), 100);
@@ -51,6 +55,8 @@ public class SimpleHttpServer {
         httpServer.createContext("/login", loginHandler);
         httpServer.createContext("/register", registerHandler);
         httpServer.createContext("/checkLogin", checkLoginHandler);
+        httpServer.createContext("/resetPwd", resetPwdHandler);
+        httpServer.createContext("/upgrade", upgradeHandler);
         Thread thread = new Thread(this::close);
         Runtime.getRuntime().addShutdownHook(thread);
 

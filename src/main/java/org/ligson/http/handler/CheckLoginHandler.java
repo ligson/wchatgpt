@@ -4,13 +4,13 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.ligson.constant.Constant;
 import org.ligson.fw.annotation.BootAutowired;
 import org.ligson.fw.annotation.BootService;
 import org.ligson.http.HttpServerResponseConverter;
+import org.ligson.http.ServerUserContext;
 import org.ligson.serializer.CruxSerializer;
-import org.ligson.vo.RegisterDTO;
 import org.ligson.vo.TokenDTO;
+import org.ligson.vo.UserInfoVo;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -26,20 +26,23 @@ public class CheckLoginHandler implements HttpHandler {
 
     @BootAutowired
     private HttpServerResponseConverter httpServerResponseConverter;
-
+    @BootAutowired
+    private ServerUserContext serverUserContext;
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         Map<String, Object> result = new HashMap<>();
         if ("post".equalsIgnoreCase(exchange.getRequestMethod())) {
             TokenDTO tokenDTO = cruxSerializer.deserialize(IOUtils.toString(exchange.getRequestBody(), StandardCharsets.UTF_8), TokenDTO.class);
-            if (tokenDTO != null && Constant.TOKEN_MAP.get(tokenDTO.getToken()) != null) {
-                RegisterDTO userInfo = Constant.LOGIN_USER_MAP.get(Constant.TOKEN_MAP.get(tokenDTO.getToken()));
-                result.put("success", true);
-                result.put("username", userInfo.getUsername());
-                result.put("token", tokenDTO.getToken());
-                httpServerResponseConverter.processResult(result, exchange);
-                return;
+            if (tokenDTO != null) {
+                UserInfoVo userInfo = serverUserContext.getLoginUserByToken(tokenDTO.getToken());
+                if (userInfo != null) {
+                    result.put("success", true);
+                    result.put("username", userInfo.getUsername());
+                    result.put("token", tokenDTO.getToken());
+                    httpServerResponseConverter.processResult(result, exchange);
+                    return;
+                }
             }
 
             result.put("success", false);

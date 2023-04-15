@@ -9,4 +9,6 @@ public class ServerVo {
 
     private String registerCode;
 
+    private String userFile;
+
 }

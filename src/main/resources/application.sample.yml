@@ -2,6 +2,8 @@ app:
   server:
     port: 服务器端口
     domainUrl: https://xx
+    registerCode: "admin"
+    userFile: "/data/users.txt"
   wx:
     token: 微信token
     appId: xx

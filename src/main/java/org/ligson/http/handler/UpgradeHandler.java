@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @BootService
-public class RegisterHandler implements HttpHandler {
+public class UpgradeHandler implements HttpHandler {
     private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-z0-9]{6,12}$");
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^[a-z0-9_]{8,}$");
 
@@ -68,7 +68,7 @@ public class RegisterHandler implements HttpHandler {
                     return;
                 }
 
-                result = serverUserContext.registerUser(req.getUsername(), req.getPassword(), "1");
+                result = serverUserContext.upgrade(req.getUsername());
                 httpServerResponseConverter.processResult(result, exchange);
                 return;
             } else {

@@ -1,75 +1,109 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>聊天</title>
-    <link rel="stylesheet" type="text/css" href="css/my.css">
+    <title>Bootstrap Chat Window</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <!-- jQuery and JavaScript Bundle with Popper -->
     <script src="js/lib/jquery.min.js"></script>
-    <script type="application/javascript"
-            src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
-    <script src="js/my.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/default.min.css">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/marked/2.1.3/marked.min.js"></script>
+    <style>
+        .chat-box {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: auto;
+            background-color: #eee;
+            overflow-y: auto;
+        }
+
+        .chat-history {
+            padding: 10px;
+            overflow: scroll;
+        }
+
+        .chat-message {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .chat-message-content {
+            padding: 6px 12px;
+            border-radius: 10px;
+        }
+
+        .chat-message.left .chat-message-content {
+            background-color: #7be353;
+        }
+
+        .chat-message.right .chat-message-content {
+            background-color: #7ed6df;
+            align-self: flex-end;
+        }
+
+        /* chat input styles */
+
+        .chat-input {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #FFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .chat-input textarea {
+            height: 40px;
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        .chat-input button {
+            height: 40px;
+            width: 80px;
+        }
+    </style>
+    <script src="js/wchat.js"></script>
+
 </head>
 <body>
-<div class="container">
-    <div class="header" style="display: flex;">
-        <div class="scroll-ad">
-            <marquee behavior="scroll" direction="left">
-                入群要求
-                <a href="#">入群发10元红包，永久免费使用国内chatGPT</a> |
-                <a href="#">定期推广本群，成为活跃成员，否则踢出群</a> |
-                <a href="#">分享Ai相关技术，赚取积分，积分可以兑换现金</a>
-            </marquee>
+<div class="modal fade" id="loadDlg" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static"
+     data-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <p>稍等，我也要思考一下...</p>
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            </div>
         </div>
-        <div style="margin-left: 10px;">
-            <span id="userInfo" style="margin-right: 26px;color: red;"><a href="/static/login.html">登录</a></span>
-        </div>
-    </div>
-    <div class="content">
-        <!-- <div class="msg_item">
-             <div class="msg_me">
-                 <div class="msg_me_icon">
-                     <img src="img/user.jpeg"/>
-                 </div>
-                 <div class="msg_me_msg">1111</div>
-             </div>
-             <div class="msg_chat">
-                 <div class="msg_chat_icon">
-                     <img src="img/chatgpt.png"/>
-                 </div>
-                 <div class="msg_chat_msg">22</div>
-             </div>
-         </div>
-         -->
-    </div>
-    <div class="footer">
-        <input type="text" class="my_input"/>
-        <button id="sendMsgBtn">发送消息</button>
     </div>
 </div>
+
+<div class="container-fluid">
+    <div class="row chat-box">
+        <div class="col-md-12 chat-history">
+
+        </div>
+        <div class="col-md-12 chat-input">
+            <textarea class="form-control my_input" placeholder="输入你的问题"></textarea>
+            <button class="btn btn-primary" id="sendBtn">发送</button>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
-<script>
-
-    $.ajax({
-        type: "POST",
-        url: '/checkLogin',
-        dataType: 'json',
-        async: false,
-        data: '{"token": "' + localStorage.getItem("token") + '"}',
-        success: function (data) {
-            if (data.success) {
-                localStorage.setItem("userInfo", data.username);
-                localStorage.setItem("token", data.token);
-            } else {
-                localStorage.removeItem("userInfo");
-                localStorage.removeItem("token");
-                alert("您的登录会话已经过期，请重新登录！")
-            }
-        }
-    });
-    if (localStorage.getItem("userInfo") == null) { // 判断本地存储中是否有用户登录信息
-        window.location.href = "/static/login.html"; // 跳转到登录页面
-    }
-    $("#userInfo").text(localStorage.getItem("userInfo"));
-
-</script>
