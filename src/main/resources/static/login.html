@@ -18,37 +18,21 @@
         <div class="register_mark">
             <div class="user_register">登录GPT</div>
             <div class="mark_files">
-                <p>手机号或者邮箱登录</p>
+                <p>账号</p>
             </div>
             <div class="input_mark">
-                <input type="text" name="username" placeholder="请输入手机号或邮箱">
+                <input type="text" name="username" placeholder="请输入账号">
             </div>
             <div class="input_mark">
                 <input type="password" name="password" placeholder="请输入密码">
             </div>
             <button type="button" id="loginButton">完 成 登 录</button>
             <div class="mark">
-                <p>没有账号？<a href="/static/register.html">立即注册</a></p>
+                <p>没有账号？联系管理员</p>
             </div>
             <div class="other_login">
                 <div class="form-others-title">
                     <div class="mlr10 fs14">————————— 其他登录方式 —————————</div>
-                    <div class="img_list">
-                        <div class="img_png">
-                            <p class="ut-01">
-                                <a href="#">
-                                    <img src="/static/img/qq.png" alt="qq登录">
-                                </a>
-                            </p>
-                        </div>
-                        <div class="img_png1">
-                            <p class="ut-02">
-                                <a href="#">
-                                    <img src="/static/img/wx.png" alt="wx登录">
-                                </a>
-                            </p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -56,34 +40,34 @@
 </form>
 
 <script type="text/javascript">
-    $(document).ready(function(){
-        $("button").click(function(){
+    $(document).ready(function () {
+        $("#loginButton").click(function () {
             console.log("111");
-            var username = $("input[name='username']").val();
-            var password = $("input[name='password']").val();
+            let username = $("input[name='username']").val();
+            let password = $("input[name='password']").val();
+            if (!username || !password) {
+                alert("请输入用户名或者密码")
+                return
+            }
             $.ajax({
                 type: "POST",
                 url: '/login',
                 dataType: 'json',
-                async: false,
-                data: '{"username": "' + username + '", "password" : "' + password + '"}',
+                data: JSON.stringify({ username: username, password: password }),
                 success: function (data) {
-                    if("ok" === data.code){
-                        localStorage.setItem("userInfo", data.nickname);
+                    if (data.success) {
+                        localStorage.setItem("userInfo", data.username);
                         localStorage.setItem("token", data.token);
                         window.location = "/static/index.html";
-                    } else{
+                    } else {
                         localStorage.removeItem("userInfo");
                         localStorage.removeItem("token");
-                        alert(data.message)
+                        alert(data.msg)
                     }
                 }
             });
         });
     });
-
-
-
 
 
 </script>
