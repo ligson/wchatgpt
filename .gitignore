@@ -35,9 +35,11 @@ build/
 .DS_Store
 logs
 .idea
-!/src/main/resources/application.yml
+#!/src/main/resources/application.yml
+!/src/main/resources/application-*.yml
 /.idea/
-/src/main/resources/application.yml
+#/src/main/resources/application.yml
 /wx-token.json
 !/msg/
 /msg
+/src/main/resources/application-dev.yml

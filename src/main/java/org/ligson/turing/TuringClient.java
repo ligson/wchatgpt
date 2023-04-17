@@ -3,7 +3,6 @@ package org.ligson.turing;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.ligson.serializer.CruxSerializer;
-import org.ligson.serializer.jackson.JacksonSerializer;
 import org.ligson.turing.vo.req.TuringReq;
 import org.ligson.turing.vo.res.TuringResult;
 import org.ligson.util.MyHttpClient;

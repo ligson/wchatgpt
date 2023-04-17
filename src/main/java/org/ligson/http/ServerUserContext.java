@@ -1,34 +1,40 @@
 package org.ligson.http;
 
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.ligson.fw.annotation.BootAutowired;
-import org.ligson.fw.annotation.BootService;
-import org.ligson.vo.AppConfig;
 import org.ligson.vo.UserInfoVo;
+import org.ligson.vo.WebResult;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-@BootService(initMethod = "init")
+@Component
 @Slf4j
 public class ServerUserContext {
-    @BootAutowired
-    private AppConfig appConfig;
+    @Value("${app.server.user-file}")
+    private String userFile;
     //所有用户
     private final Map<String, UserInfoVo> userMap = new ConcurrentHashMap<>();
     //已经登录用户
     private final Map<String, UserInfoVo> onlineUserMap = new ConcurrentHashMap<>();
 
+    @PostConstruct
     public void init() {
         try {
-            File file = new File(appConfig.getApp().getServer().getUserFile());
+            File file = new File(userFile);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
             String line;
             while ((line = bufferedReader.readLine()) != null) {
@@ -58,8 +64,8 @@ public class ServerUserContext {
         return onlineUserMap.get(token);
     }
 
-    public Map<String, Object> login(String username, String password) {
-        Map<String, Object> result = new HashMap<>();
+    public WebResult login(String username, String password) {
+        WebResult webResult = new WebResult();
         UserInfoVo vo = userMap.get(username);
         if (vo != null) {
             if (vo.getPassword().equals(password)) {
@@ -68,73 +74,71 @@ public class ServerUserContext {
                     Date nowDate = Calendar.getInstance().getTime();
                     if (nowDate.getTime() < endDate.getTime()) {
                         String token = UUID.randomUUID().toString();
-                        result.put("success", true);
-                        result.put("token", token);
+                        webResult.setSuccess(true);
+                        webResult.putData("token", token);
                         onlineUserMap.put(token, vo);
                     } else {
-                        result.put("success", false);
-                        result.put("msg", "成本有限,免费用户只能用两天，请联系管理员付费,请谅解");
+                        webResult.setSuccess(false);
+                        webResult.putData("msg", "成本有限,免费用户只能用两天，请联系管理员付费,请谅解");
                     }
                 } else {
                     String token = UUID.randomUUID().toString();
-                    result.put("success", true);
-                    result.put("token", token);
+                    webResult.setSuccess(true);
+                    webResult.putData("token", token);
                     onlineUserMap.put(token, vo);
                 }
             } else {
-                result.put("success", false);
-                result.put("msg", "密码错误");
+                webResult.setSuccess(false);
+                webResult.setErrorMsg("密码错误");
             }
         } else {
-            result.put("success", false);
-            result.put("msg", "用户不存在");
+            webResult.setSuccess(false);
+            webResult.setErrorMsg("用户不存在");
         }
-        return result;
+        return webResult;
     }
 
-    public synchronized Map<String, Object> registerUser(String username, String password, String level) {
-        Map<String, Object> result = new HashMap<>();
+    public synchronized WebResult registerUser(String username, String password, String level) {
+        WebResult webResult = new WebResult();
         UserInfoVo vo = userMap.get(username);
         if (vo != null) {
-            result.put("success", false);
-            result.put("msg", "用户名已经存在");
-            return result;
+            webResult.setErrorMsg("用户名已经存在");
+            return webResult;
         }
         try {
             Date registerDate = Calendar.getInstance().getTime();
             String registerDateStr = DateFormatUtils.format(registerDate, "yyyyMMddHHmmss");
-            PrintWriter printWriter = new PrintWriter(new FileWriter(appConfig.getApp().getServer().getUserFile(), true));
+            PrintWriter printWriter = new PrintWriter(new FileWriter(userFile, true));
             printWriter.println(String.join(",", username, password, level, registerDateStr));
             printWriter.close();
-            result.put("success", true);
+
 
             vo = new UserInfoVo(username, password, level, registerDate);
             userMap.put(username, vo);
-            return result;
+            webResult.setSuccess(true);
+            return webResult;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            result.put("success", false);
-            result.put("msg", e.getMessage());
-            return result;
+            webResult.setErrorMsg(e.getMessage());
+            webResult.setStackTrace(ExceptionUtils.getStackTrace(e));
+            return webResult;
         }
     }
 
-    public synchronized Map<String, Object> resetPassword(String username, String oldPassword, String newPassword) {
-        Map<String, Object> result = new HashMap<>();
+    public synchronized WebResult resetPassword(String username, String oldPassword, String newPassword) {
+        WebResult webResult = new WebResult();
         UserInfoVo vo = userMap.get(username);
         if (vo == null) {
-            result.put("success", false);
-            result.put("msg", "用户名不存在");
-            return result;
+            webResult.setErrorMsg("用户名不存在");
+            return webResult;
         }
         if (!vo.getPassword().equals(oldPassword)) {
-            result.put("success", false);
-            result.put("msg", "旧密码不正确");
-            return result;
+            webResult.setErrorMsg("旧密码不正确");
+            return webResult;
         }
         try {
-            File userFile = new File(appConfig.getApp().getServer().getUserFile());
-            FileInputStream fis = new FileInputStream(userFile);
+            File userFile1 = new File(userFile);
+            FileInputStream fis = new FileInputStream(userFile1);
             String userFileContent = IOUtils.toString(fis, StandardCharsets.UTF_8);
             fis.close();
             StringBuilder builder = new StringBuilder();
@@ -147,34 +151,33 @@ public class ServerUserContext {
 
             String registerDateStr = DateFormatUtils.format(vo.getRegisterDate(), "yyyyMMddHHmmss");
             builder.append(String.join(",", username, newPassword, vo.getLevel(), registerDateStr)).append("\n");
-            FileOutputStream fos = new FileOutputStream(userFile);
+            FileOutputStream fos = new FileOutputStream(userFile1);
             IOUtils.write(builder.toString(), fos, StandardCharsets.UTF_8);
             fos.close();
-            result.put("success", true);
+            webResult.setSuccess(true);
             vo.setPassword(newPassword);
             userMap.put(username, vo);
-            return result;
+            return webResult;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            result.put("success", false);
-            result.put("msg", e.getMessage());
-            return result;
+            webResult.setErrorMsg(e.getMessage());
+            return webResult;
         }
     }
 
 
-    public synchronized Map<String, Object> upgrade(String username) {
-        Map<String, Object> result = new HashMap<>();
+    public synchronized WebResult upgrade(String username) {
+        WebResult webResult = new WebResult();
+
         UserInfoVo vo = userMap.get(username);
         if (vo == null) {
-            result.put("success", false);
-            result.put("msg", "用户名不存在");
-            return result;
+            webResult.setErrorMsg("用户名不存在");
+            return webResult;
         }
 
         try {
-            File userFile = new File(appConfig.getApp().getServer().getUserFile());
-            FileInputStream fis = new FileInputStream(userFile);
+            File userFile1 = new File(userFile);
+            FileInputStream fis = new FileInputStream(userFile1);
             String userFileContent = IOUtils.toString(fis, StandardCharsets.UTF_8);
             fis.close();
             StringBuilder builder = new StringBuilder();
@@ -187,18 +190,17 @@ public class ServerUserContext {
 
             String registerDateStr = DateFormatUtils.format(vo.getRegisterDate(), "yyyyMMddHHmmss");
             builder.append(String.join(",", username, vo.getPassword(), "2", registerDateStr)).append("\n");
-            FileOutputStream fos = new FileOutputStream(userFile);
+            FileOutputStream fos = new FileOutputStream(userFile1);
             IOUtils.write(builder.toString(), fos, StandardCharsets.UTF_8);
             fos.close();
-            result.put("success", true);
+            webResult.setSuccess(true);
             vo.setLevel("2");
             userMap.put(username, vo);
-            return result;
+            return webResult;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            result.put("success", false);
-            result.put("msg", e.getMessage());
-            return result;
+            webResult.setErrorMsg(e.getMessage());
+            return webResult;
         }
     }
 

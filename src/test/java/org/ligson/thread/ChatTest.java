@@ -1,7 +1,5 @@
 package org.ligson.thread;
 
-import org.ligson.vo.AppConfig;
-
 public class ChatTest {
     private static AppConfig appConfig;
 

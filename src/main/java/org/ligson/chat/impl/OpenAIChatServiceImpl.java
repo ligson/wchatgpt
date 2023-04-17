@@ -1,10 +1,9 @@
 package org.ligson.chat.impl;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.ligson.chat.ChatService;
-import org.ligson.fw.annotation.BootAutowired;
-import org.ligson.fw.annotation.BootService;
 import org.ligson.openai.OpenAiClient;
 import org.ligson.openai.vo.Model;
 import org.ligson.openai.vo.ModelResult;
@@ -15,30 +14,32 @@ import org.ligson.openai.vo.req.ReqContext;
 import org.ligson.openai.vo.res.*;
 import org.ligson.serializer.CruxSerializer;
 import org.ligson.util.MyHttpClient;
-import org.ligson.vo.AppConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@BootService(initMethod = "init")
+@Service
 @Slf4j
 public class OpenAIChatServiceImpl implements ChatService {
     private OpenAiClient openAiClient;
-
-    @BootAutowired
-    private AppConfig appConfig;
-    @BootAutowired
+    @Autowired
     private CruxSerializer cruxSerializer;
-    @BootAutowired
+    @Autowired
     private MyHttpClient myHttpClient;
+    @Value("${app.openai.sk-token}")
+    private String skToken;
 
     public OpenAIChatServiceImpl() {
         log.debug("---");
     }
 
+    @PostConstruct
     public void init() {
-        this.openAiClient = new OpenAiClient(appConfig.getApp().getOpenai().getSkToken(), myHttpClient, cruxSerializer);
+        this.openAiClient = new OpenAiClient(skToken, myHttpClient, cruxSerializer);
         log.debug("openAiClient is :{}", this.openAiClient.hashCode());
     }
 

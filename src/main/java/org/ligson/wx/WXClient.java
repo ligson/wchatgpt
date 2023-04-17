@@ -6,16 +6,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
-import org.ligson.fw.annotation.BootAutowired;
-import org.ligson.fw.annotation.BootService;
 import org.ligson.serializer.CruxSerializer;
 import org.ligson.util.MyHttpClient;
-import org.ligson.vo.AppConfig;
-import org.ligson.vo.WXVo;
 import org.ligson.wx.vo.AccessTokenRes;
 import org.ligson.wx.vo.CustomMsg;
 import org.ligson.wx.vo.CustomMsgRes;
 import org.ligson.wx.vo.ReceivingStdMsgVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,17 +23,20 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 
-@BootService
+@Component
 @Slf4j
 public class WXClient {
     private static final String baseUrl = "https://api.weixin.qq.com/cgi-bin";
-    @BootAutowired
+    @Autowired
     private MyHttpClient myHttpClient;
-    @BootAutowired
-    private AppConfig appConfig;
     private static AccessTokenRes accessTokenRes;
-    @BootAutowired
+    @Autowired
     private CruxSerializer cruxSerializer;
+
+    @Value("${app.wx.app-id}")
+    private String appId;
+    @Value("${app.wx.app-secret}")
+    private String appSecret;
 
 
     public void pushMsg(String toUser, String msg) {
@@ -141,9 +143,8 @@ public class WXClient {
         AccessTokenRes accessTokenRes1 = new AccessTokenRes();
         File file = new File("wx-token.json");
         //https://developers.weixin.qq.com/doc/offiaccount/Basic_Information/Get_access_token.html
-        WXVo wx = appConfig.getApp().getWx();
         try {
-            accessTokenRes1 = myHttpClient.doGet(baseUrl + "/token?grant_type=client_credential&appid=" + wx.getAppId() + "&secret=" + wx.getAppSecret(), Collections.emptyList(), AccessTokenRes.class);
+            accessTokenRes1 = myHttpClient.doGet(baseUrl + "/token?grant_type=client_credential&appid=" + appId + "&secret=" + appSecret, Collections.emptyList(), AccessTokenRes.class);
             if (accessTokenRes1 != null && accessTokenRes1.getErrcode() == 0) {
                 accessTokenRes1.setCreatedTime(System.currentTimeMillis() / 1000);
                 String config = cruxSerializer.serialize(accessTokenRes1);
