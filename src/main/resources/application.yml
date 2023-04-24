@@ -1,7 +1,3 @@
-server:
-  port: 8080
-  servlet:
-    context-path: /wchatgpt-be/
 app:
   server:
     port: 服务器端口
@@ -20,3 +16,7 @@ app:
   openai:
     skToken: xxx
     keyword: xxx
+server:
+  port: 8080
+  servlet:
+    context-path: /wchatgpt-be/

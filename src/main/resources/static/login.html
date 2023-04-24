@@ -5,12 +5,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- 引入样式 -->
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+<!--    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">-->
     <!-- 引入组件库 -->
-    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<!--    <script src="https://unpkg.com/element-ui/lib/index.js"></script>-->
     <script src="js/lib/jquery.min.js"></script>
     <title>用户登录页面</title>
-    <link rel="stylesheet" href="/static/css/login.css">
+    <link rel="stylesheet" href="./css/login.css">
 </head>
 <body>
 <form action="" method="get">
@@ -26,7 +26,7 @@
             </div>
             <button type="button" id="loginButton">完 成 登 录</button>
             <div class="mark">
-                <p>没有账号？联系管理员(加微信:jmc01362474或者shu3000f)</p>
+<!--                <p>没有账号？联系管理员(加微信:jmc01362474或者shu3000f)</p>-->
             </div>
         </div>
     </div>
@@ -44,18 +44,19 @@
             }
             $.ajax({
                 type: "POST",
-                url: '/login',
+                url: '/wchatgpt-be/api/auth/login',
                 dataType: 'json',
+                contentType: 'application/json',
                 data: JSON.stringify({ username: username, password: password }),
                 success: function (data) {
                     if (data.success) {
-                        localStorage.setItem("userInfo", data.username);
-                        localStorage.setItem("token", data.token);
-                        window.location = "/static/index.html";
+                        localStorage.setItem("userInfo", data.data.username);
+                        localStorage.setItem("token", data.data.token);
+                        window.location = "/wchatgpt-be/index.html";
                     } else {
                         localStorage.removeItem("userInfo");
                         localStorage.removeItem("token");
-                        alert(data.msg)
+                        alert(data.errorMsg)
                     }
                 }
             });

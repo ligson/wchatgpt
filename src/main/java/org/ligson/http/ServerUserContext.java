@@ -75,6 +75,7 @@ public class ServerUserContext {
                     if (nowDate.getTime() < endDate.getTime()) {
                         String token = UUID.randomUUID().toString();
                         webResult.setSuccess(true);
+                        webResult.putData("username",username);
                         webResult.putData("token", token);
                         onlineUserMap.put(token, vo);
                     } else {
@@ -84,6 +85,7 @@ public class ServerUserContext {
                 } else {
                     String token = UUID.randomUUID().toString();
                     webResult.setSuccess(true);
+                    webResult.putData("username",username);
                     webResult.putData("token", token);
                     onlineUserMap.put(token, vo);
                 }

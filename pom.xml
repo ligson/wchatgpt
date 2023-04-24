@@ -6,8 +6,7 @@
 
     <groupId>org.ligson</groupId>
     <artifactId>wchatgpt</artifactId>
-    <version>ichat-SNAPSHOT</version>
-
+    <version>springboot-1.0-SNAPSHOT</version>
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -50,12 +49,6 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.14.2</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.33</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -109,12 +102,35 @@
         </repository>
     </repositories>
 
+
     <build>
+        <finalName>wchatgpt</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>1.2.2</version>
+                <configuration>
+                    <serverId>docker-registry</serverId>
+                    <registryUrl>https://dockerhub.yonyougov.top/</registryUrl>
+                    <baseImage>dockerhub.yonyougov.top/public/openjdk:17.0.2-slim-buster-aliyun</baseImage>
+                    <imageName>dockerhub.yonyougov.top/public/${project.artifactId}</imageName>
+                    <imageTags>${project.version}</imageTags>
+                    <cmd>["java", "-jar", "-Duser.timezone=Asia/Shanghai", "/app/${project.build.finalName}.jar"]</cmd>
+                    <resources>
+                        <resource>
+                            <targetPath>/app/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>

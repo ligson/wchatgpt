@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <script src="js/lib/jquery.min.js"></script>
     <title>升级用户</title>
-    <link rel="stylesheet" href="/static/css/login.css">
+    <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
 <form action="" method="get">
@@ -48,7 +48,7 @@
 
             $.ajax({
                 type: "POST",
-                url: '/upgrade',
+                url: '/wchatgpt-be/api/user/upgrade',
                 contentType: "application/json",
                 dataType: 'json',
                 data: JSON.stringify({ username: username, register_code: register_code }),
@@ -56,7 +56,7 @@
                     if (data.success) {
                         alert("升级成功!");
                     } else {
-                        alert("升级失败," + data.msg);
+                        alert("升级失败," + data.errorMsg);
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {

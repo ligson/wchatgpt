@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @PostMapping("/upgrade")
-    public WebResult upgrade(RegisterDTO req) {
+    public WebResult upgrade(@RequestBody RegisterDTO req) {
         WebResult webResult = new WebResult();
         if (StringUtils.isNotBlank(req.getUsername()) && StringUtils.isNotBlank(req.getRegisterCode())) {
             if (!registerCode.equals(req.getRegisterCode())) {

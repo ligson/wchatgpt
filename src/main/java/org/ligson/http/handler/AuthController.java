@@ -38,6 +38,7 @@ public class AuthController {
         WebResult webResult = WebResult.newInstance();
         UserInfoVo userInfo = serverUserContext.getLoginUserByToken(tokenDTO.getToken());
         if (userInfo != null) {
+            webResult.setSuccess(true);
             webResult.putData("username", userInfo.getUsername());
             webResult.putData("token", tokenDTO.getToken());
         } else {

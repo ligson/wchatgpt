@@ -11,7 +11,7 @@ function req_msg(msg) {
     }
     //$(".left chat-message-content")
     $.ajax({
-        url: "/chat",
+        url: "/wchatgpt-be/api/openai/chat",
         method: "POST",
         dataType: "json",
         contentType: "application/json",
@@ -19,7 +19,7 @@ function req_msg(msg) {
         data: JSON.stringify({ messages: [{ content: msg, role: "user" }] }),
         success: function (data) {
             if (data.success) {
-                let htmlText = marked(data.msg);
+                let htmlText = marked(data.data.msg);
                 // 对代码进行高亮显示
                 $('pre code').each(function (i, block) {
                     hljs.highlightBlock(block);
@@ -38,14 +38,16 @@ function req_msg(msg) {
         }
     })
 }
-function resizeChatBox(){
+
+function resizeChatBox() {
     $('.chat-box').height($(window).height());
     $('.chat-history').height($('.chat-box').height() - $(".chat-input").outerHeight());
 }
+
 $(function () {
     // adjust chat box height on window resize
     $(window).resize(function () {
-       resizeChatBox();
+        resizeChatBox();
     });
 
 // adjust chat box height on initial load
@@ -69,14 +71,15 @@ $(function () {
 
     $.ajax({
         type: "POST",
-        url: '/checkLogin',
+        url: '/wchatgpt-be/api/auth/checkLogin',
         dataType: 'json',
+        contentType: 'application/json',
         async: false,
         data: '{"token": "' + localStorage.getItem("token") + '"}',
         success: function (data) {
             if (data.success) {
-                localStorage.setItem("userInfo", data.username);
-                localStorage.setItem("token", data.token);
+                localStorage.setItem("userInfo", data.data.username);
+                localStorage.setItem("token", data.data.token);
             } else {
                 localStorage.removeItem("userInfo");
                 localStorage.removeItem("token");
@@ -85,7 +88,7 @@ $(function () {
         }
     });
     if (localStorage.getItem("userInfo") == null) { // 判断本地存储中是否有用户登录信息
-        window.location.href = "/static/login.html"; // 跳转到登录页面
+        window.location.href = "/wchatgpt-be/login.html"; // 跳转到登录页面
     }
     //$("#userInfo").text(localStorage.getItem("userInfo"));
 
