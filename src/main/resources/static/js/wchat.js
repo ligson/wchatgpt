@@ -27,11 +27,17 @@ function req_msg(msg) {
         data: JSON.stringify({ messages: messages }),
         success: function (data) {
             if (data.success) {
-                let htmlText = marked(data.data.msg);
-                // 对代码进行高亮显示
-                $('pre code').each(function (i, block) {
-                    hljs.highlightBlock(block);
-                });
+                let htmlText;
+                if (msg.indexOf("图片") >= 0) {
+                    htmlText = data.data.msg;
+                } else {
+                    htmlText = marked(data.data.msg);
+                    // 对代码进行高亮显示
+                    $('pre code').each(function (i, block) {
+                        hljs.highlightBlock(block);
+                    });
+                }
+
 
                 //let highlightedText = hljs.highlightAuto(htmlText).value;
 

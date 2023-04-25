@@ -7,10 +7,7 @@ import org.ligson.chat.ChatService;
 import org.ligson.openai.OpenAiClient;
 import org.ligson.openai.vo.Model;
 import org.ligson.openai.vo.ModelResult;
-import org.ligson.openai.vo.req.ChatCompletionsReq;
-import org.ligson.openai.vo.req.CompletionsReq;
-import org.ligson.openai.vo.req.ImgGenReq;
-import org.ligson.openai.vo.req.ReqContext;
+import org.ligson.openai.vo.req.*;
 import org.ligson.openai.vo.res.*;
 import org.ligson.serializer.CruxSerializer;
 import org.ligson.util.MyHttpClient;
@@ -18,8 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +32,10 @@ public class OpenAIChatServiceImpl implements ChatService {
     private MyHttpClient myHttpClient;
     @Value("${app.openai.sk-token}")
     private String skToken;
+    @Value("${app.openai.img-dir}")
+    private String imgDir;
+    @Value("${app.server.domain-url}")
+    private String domainUrl;
 
     public OpenAIChatServiceImpl() {
         log.debug("---");
@@ -48,7 +52,7 @@ public class OpenAIChatServiceImpl implements ChatService {
         return result.getData().stream().map(Model::getId).collect(Collectors.toList());
     }
 
-    public String chat(ChatCompletionsReq completionsReq) {
+    private String chatTxt(ChatCompletionsReq completionsReq) {
         ChatCompletionsRes res = openAiClient.chatCompletions(completionsReq);
         if (res != null) {
             if (!res.getChoices().isEmpty()) {
@@ -60,6 +64,36 @@ public class OpenAIChatServiceImpl implements ChatService {
             }
         }
         return null;
+    }
+
+    public String chat(ChatCompletionsReq completionsReq) {
+        List<Message> messages = completionsReq.getMessages();
+        if (messages.isEmpty()) {
+            return null;
+        }
+        Message message = messages.get(messages.size() - 1);
+        if (message.getContent().contains("图片")) {
+            return chatImg(completionsReq, message.getContent());
+        } else {
+            return chatTxt(completionsReq);
+        }
+    }
+
+    private String chatImg(ChatCompletionsReq completionsReq, String msg) {
+        List<String> urls = imageGenerate(msg);
+        StringBuilder builder = new StringBuilder();
+        for (String url : urls) {
+            File file;
+            try {
+                file = myHttpClient.download(url, UUID.randomUUID().toString(), imgDir + "user-images");
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+                continue;
+            }
+            String imgUrl = domainUrl + "/user-images/" + file.getName();
+            builder.append("<img src='").append(imgUrl).append("'/>").append("<br/>");
+        }
+        return builder.toString();
     }
 
     @Override

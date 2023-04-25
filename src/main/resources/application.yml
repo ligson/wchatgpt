@@ -1,7 +1,7 @@
 app:
   server:
     port: 服务器端口
-    domainUrl: https://xx
+    domain-url: https://xx
     registerCode: "admin"
     userFile: "/data/users.txt"
   wx:
@@ -16,7 +16,12 @@ app:
   openai:
     skToken: xxx
     keyword: xxx
+    img-dir: /tmp/
 server:
   port: 8080
   servlet:
     context-path: /wchatgpt-be/
+spring:
+  web:
+    resources:
+      static-locations: classpath:/static/,classpath:/resources/,file:${app.openai.img-dir}

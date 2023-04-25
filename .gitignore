@@ -43,3 +43,4 @@ logs
 !/msg/
 /msg
 /src/main/resources/application-dev.yml
+/user-data/user-images/
