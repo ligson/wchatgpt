@@ -1,6 +1,5 @@
 package org.ligson.chat.impl;
 
-import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import org.apache.commons.lang3.StringUtils;
 import org.ligson.chat.ChatService;
@@ -12,6 +11,8 @@ import org.ligson.util.MyHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
 
 @Service
 public class TuringChatServiceImpl implements ChatService {

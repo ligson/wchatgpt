@@ -1,9 +1,9 @@
 package org.ligson.chat.impl;
 
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.ligson.chat.ChatService;
+import org.ligson.images.GenerateImageService;
 import org.ligson.openai.OpenAiClient;
 import org.ligson.openai.vo.Model;
 import org.ligson.openai.vo.ModelResult;
@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +38,8 @@ public class OpenAIChatServiceImpl implements ChatService {
     private String imgDir;
     @Value("${app.server.domain-url}")
     private String domainUrl;
+    @Autowired
+    private GenerateImageService imageService;
 
     public OpenAIChatServiceImpl() {
         log.debug("---");
@@ -80,18 +84,21 @@ public class OpenAIChatServiceImpl implements ChatService {
     }
 
     private String chatImg(ChatCompletionsReq completionsReq, String msg) {
-        List<String> urls = imageGenerate(msg);
+        String imageUrl = imageService.imageGenerate(msg);
         StringBuilder builder = new StringBuilder();
-        for (String url : urls) {
-            File file;
-            try {
-                file = myHttpClient.download(url, UUID.randomUUID().toString(), imgDir + "user-images");
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-                continue;
+        if (imageUrl != null) {
+            List<String> urls = Collections.singletonList(imageUrl);
+            for (String url : urls) {
+                File file;
+                try {
+                    file = myHttpClient.download(url, UUID.randomUUID().toString(), imgDir + "user-images");
+                } catch (IOException e) {
+                    log.error(e.getMessage(), e);
+                    continue;
+                }
+                String imgUrl = domainUrl + "/user-images/" + file.getName();
+                builder.append("<img src='").append(imgUrl).append("'/>").append("<br/>");
             }
-            String imgUrl = domainUrl + "/user-images/" + file.getName();
-            builder.append("<img src='").append(imgUrl).append("'/>").append("<br/>");
         }
         return builder.toString();
     }

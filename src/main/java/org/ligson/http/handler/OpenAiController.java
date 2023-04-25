@@ -1,6 +1,5 @@
 package org.ligson.http.handler;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.ligson.chat.impl.OpenAIChatServiceImpl;
 import org.ligson.http.ServerUserContext;
@@ -9,6 +8,7 @@ import org.ligson.vo.WebResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 @RestController
@@ -18,7 +18,6 @@ public class OpenAiController {
     private OpenAIChatServiceImpl openAIChatService;
     @Autowired
     private ServerUserContext serverUserContext;
-
 
     @PostMapping("/chat")
     public WebResult handle(@RequestBody ChatCompletionsReq completionsReq,
