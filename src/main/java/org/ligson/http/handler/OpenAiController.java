@@ -43,7 +43,7 @@ public class OpenAiController {
     }
 
     @GetMapping("/models")
-    public void models() {
-        WebResult.newSuccessInstance().putData("models", openAIChatService.models());
+    public WebResult models() {
+        return WebResult.newSuccessInstance().putData("models", openAIChatService.models());
     }
 }

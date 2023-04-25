@@ -10,13 +10,21 @@ function req_msg(msg) {
         return;
     }
     //$(".left chat-message-content")
+    let userDivs = $(".chat-history .left .chat-message-content");
+    let assistantDivs = $(".chat-history .right .chat-message-content");
+    let messages = []
+    for (let i = 0; i < userDivs.length; i++) {
+        messages.push({ content: userDivs[i].innerHTML.trim(), role: "user" })
+        messages.push({ content: assistantDivs[i].innerHTML.trim(), role: "assistant" })
+    }
+    messages.push({ content: msg, role: "user" })
     $.ajax({
         url: "/wchatgpt-be/api/openai/chat",
         method: "POST",
         dataType: "json",
         contentType: "application/json",
         headers: { "token": token },
-        data: JSON.stringify({ messages: [{ content: msg, role: "user" }] }),
+        data: JSON.stringify({ messages: messages }),
         success: function (data) {
             if (data.success) {
                 let htmlText = marked(data.data.msg);
@@ -28,7 +36,13 @@ function req_msg(msg) {
                 //let highlightedText = hljs.highlightAuto(htmlText).value;
 
 
-                $(".chat-history").append("<div class=\"chat-message left\">\n" + "                <div class=\"chat-message-content\">\n" + msg + "                </div>\n" + "            </div>\n" + "            <div class=\"chat-message right\">\n" + "                <div class=\"chat-message-content\">\n" + htmlText + "                </div>\n" + "            </div>");
+                $(".chat-history").append(
+                    "<div class=\"chat-message left\">\n"
+                    + "    <div class=\"chat-message-content\">\n" + msg + "</div>\n"
+                    + "</div>\n"
+                    + "<div class=\"chat-message right\">\n"
+                    + "    <div class=\"chat-message-content\">\n" + htmlText + "</div>\n"
+                    + "</div>");
 
                 $(".my_input").val("")
                 $("#loadDlg").modal('toggle')
