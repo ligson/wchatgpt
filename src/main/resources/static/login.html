@@ -48,9 +48,7 @@
                     if (data.success) {
                         localStorage.setItem("userInfo", data.data.username);
                         localStorage.setItem("token", data.data.token);
-                        if (localStorage.getItem("userInfo") == null) { // 判断本地存储中是否有用户登录信息
-                            window.location.href = "/wchatgpt-be/index.html"; // 跳转到登录页面
-                        }
+                        window.location.href = "/wchatgpt-be/index.html"; // 跳转到登录页面
                     } else {
                         localStorage.removeItem("userInfo");
                         localStorage.removeItem("token");
