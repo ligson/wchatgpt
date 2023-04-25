@@ -62,4 +62,26 @@ public class UserController {
             return webResult;
         }
     }
+
+    @PostMapping("/delete")
+    public WebResult delete(@RequestBody RegisterDTO req) {
+        WebResult webResult = new WebResult();
+        if (StringUtils.isNotBlank(req.getUsername()) && StringUtils.isNotBlank(req.getRegisterCode())) {
+            if (!registerCode.equals(req.getRegisterCode())) {
+                webResult.setErrorMsg("注册码错误!");
+                return webResult;
+            }
+
+            Matcher usernameMatcher = USERNAME_PATTERN.matcher(req.getUsername());
+            if (!usernameMatcher.matches()) {
+                webResult.setErrorMsg("账号格式错误!");
+                return webResult;
+            }
+
+            return serverUserContext.deleteUser(req.getUsername());
+        } else {
+            webResult.setErrorMsg("参数格式错误!");
+            return webResult;
+        }
+    }
 }
