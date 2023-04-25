@@ -75,7 +75,7 @@ public class ServerUserContext {
                     if (nowDate.getTime() < endDate.getTime()) {
                         String token = UUID.randomUUID().toString();
                         webResult.setSuccess(true);
-                        webResult.putData("username",username);
+                        webResult.putData("username", username);
                         webResult.putData("token", token);
                         onlineUserMap.put(token, vo);
                     } else {
@@ -85,7 +85,7 @@ public class ServerUserContext {
                 } else {
                     String token = UUID.randomUUID().toString();
                     webResult.setSuccess(true);
-                    webResult.putData("username",username);
+                    webResult.putData("username", username);
                     webResult.putData("token", token);
                     onlineUserMap.put(token, vo);
                 }
@@ -207,4 +207,32 @@ public class ServerUserContext {
     }
 
 
+    public synchronized WebResult deleteUser(String username) {
+        WebResult webResult = new WebResult();
+        File users = new File(userFile);
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(users));
+            String line;
+            StringBuilder stringBuilder = new StringBuilder();
+            while ((line = reader.readLine()) != null) {
+                String[] array = line.split(",");
+                if (array.length == 4) {
+                    if (!username.equals(array[0])) {
+                        stringBuilder.append(line).append("\n");
+                    }
+                }
+            }
+            reader.close();
+            FileOutputStream fos = new FileOutputStream(users);
+            IOUtils.write(stringBuilder.toString(), fos, StandardCharsets.UTF_8);
+            fos.close();
+            webResult.setSuccess(true);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            webResult.setSuccess(false);
+            webResult.setErrorMsg("删除失败");
+            webResult.setStackTrace(ExceptionUtils.getStackTrace(e));
+        }
+        return webResult;
+    }
 }
