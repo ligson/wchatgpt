@@ -3,10 +3,11 @@ version: '3.6'
 services:
   data:
     #image: dockerhub.yonyougov.top/public/wchatgpt:1.0-SNAPSHOT
-    image: dockerhub.yonyougov.top/public/wchatgpt:springboot-SNAPSHOT
+    #image: dockerhub.yonyougov.top/public/wchatgpt:springboot-1.0-SNAPSHOT
+    image: ligson/wchatgpt:springboot-1.0-SNAPSHOT
     container_name: wchatgpt
     restart: always
-    command: [ "java", "-jar", "-Duser.timezone=Asia/Shanghai","-Dspring.profiles.active=dev", "/app/wchatgpt-springboot-SNAPSHOT.jar","--spring.config.additional-location=/app/conf/" ]
+    command: [ "java", "-jar", "-Duser.timezone=Asia/Shanghai","-Dspring.profiles.active=dev", "/app/wchatgpt.jar","--spring.config.additional-location=/app/conf/" ]
     #environment:
     #   api_key: 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
     #   wechat: true
@@ -15,6 +16,7 @@ services:
       - "8080:8080"
     volumes:
       - ./data/conf:/app/conf
+      - ./data/user-data:/app/user-data
       - ./data/conf/users.txt:/app/wchatgpt/conf/users.txt
       - ./data/logs:/app/logs
 networks:
