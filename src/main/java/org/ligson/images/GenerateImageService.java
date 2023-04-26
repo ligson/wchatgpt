@@ -81,7 +81,7 @@ public class GenerateImageService {
         assert body != null;
         String imageId = body.getId();
         if ("pending".equals(body.getState())) {
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 30; i++) {
                 try {
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {

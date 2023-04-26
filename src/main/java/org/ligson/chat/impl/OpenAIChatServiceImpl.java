@@ -97,7 +97,7 @@ public class OpenAIChatServiceImpl implements ChatService {
                     continue;
                 }
                 String imgUrl = domainUrl + "/user-images/" + file.getName();
-                builder.append("<img src='").append(imgUrl).append("'/>").append("<br/>");
+                builder.append("<img src='").append(imgUrl).append("' style=\"width: 300px;height: 490px;\"/>").append("<br/>");
             }
         }
         return builder.toString();
