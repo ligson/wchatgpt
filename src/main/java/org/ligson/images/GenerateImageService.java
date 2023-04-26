@@ -34,6 +34,7 @@ public class GenerateImageService {
      * @return imageUrl
      */
     public String imageGenerate(String prompt) {
+        prompt = prompt.replace("图片", "");
         try {
             return doImageGenerate(prompt);
         } catch (Throwable e) {
