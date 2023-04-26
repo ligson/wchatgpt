@@ -53,7 +53,8 @@ function req_msg(msg) {
                 $(".my_input").val("")
                 $("#loadDlg").modal('toggle')
             } else {
-                alert("失败");
+                $("#loadDlg").modal('toggle')
+                alert(data.errorMsg);
             }
         }
     })
@@ -89,10 +90,11 @@ $(function () {
         req_msg($(".my_input").val())
     });
 
-    $('body').keydown(function(){
-        if (event.ctrlKey && event.keyCode == 13){
-          req_msg($(".my_input").val())
-        };
+    $('body').keydown(function () {
+        if (event.ctrlKey && event.keyCode == 13) {
+            req_msg($(".my_input").val())
+        }
+        ;
     });
 
     $.ajax({

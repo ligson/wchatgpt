@@ -12,7 +12,7 @@
 <form action="" method="get">
     <div class="box2">
         <div class="register_mark">
-            <div class="user_register">登录GPT</div>
+            <div class="user_register"><img src="img/abroket-logo.png"/></div>
 
             <div class="input_mark">
                 <input type="text" name="username" placeholder="请输入账号">
@@ -40,6 +40,9 @@
                 if (data.success) {
                     $("#wx_id").html(data.data.wxId);
                     $("#wx_qrcode").attr("src", data.data.wxQrCode);
+                    if(data.data.wxId!=='abroket'){
+                        $(".user_register").html("登录");
+                    }
                 }
             }
         });

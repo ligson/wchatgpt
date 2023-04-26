@@ -8,7 +8,7 @@ body {
 /* 盒子外围的样式设置 */
 .box2 {
     width: 100%;
-    height: 100vh;
+    /*height: 100vh;*/
     /* 弹性布局 */
     display: flex;
     /* 上下居中对齐 */
@@ -20,7 +20,7 @@ body {
 /* 整个注册界面的样式设置 */
 .register_mark {
     width: 600px;
-    height: 550px;
+    /*height: 550px;*/
     /* 圆角边框 */
     border-radius: 30px;
     text-align: center;
@@ -33,7 +33,11 @@ body {
     color: #145dff;
     font-weight: bold;
     font-family: "microsoft yahei";
-    line-height: 100px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
 }
 
 /* 提示语文字的样式设置 */
