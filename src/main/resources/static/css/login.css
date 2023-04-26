@@ -33,7 +33,10 @@ body {
     color: #145dff;
     font-weight: bold;
     font-family: "microsoft yahei";
-    line-height: 100px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }
 
 /* 提示语文字的样式设置 */
