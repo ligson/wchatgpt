@@ -89,6 +89,12 @@ $(function () {
         req_msg($(".my_input").val())
     });
 
+    $('body').keydown(function(){
+        if (event.ctrlKey && event.keyCode == 13){
+          req_msg($(".my_input").val())
+        };
+    });
+
     $.ajax({
         type: "POST",
         url: '/wchatgpt-be/api/auth/checkLogin',
