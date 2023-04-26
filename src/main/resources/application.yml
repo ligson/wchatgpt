@@ -1,4 +1,8 @@
 app:
+  customer:
+    wx:
+      id: xxx
+      qr_code: xx
   server:
     port: 服务器端口
     domain-url: https://xx

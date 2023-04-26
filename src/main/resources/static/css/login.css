@@ -1,11 +1,12 @@
 /* 整个boby页面的样式 */
 body {
-    background:url(../img/login.jpg) no-repeat;
+    background: url(../img/login.jpg) no-repeat;
     background-size: 100% 100%;
     height: 100vh;
 }
+
 /* 盒子外围的样式设置 */
-.box2  {
+.box2 {
     width: 100%;
     height: 100vh;
     /* 弹性布局 */
@@ -15,6 +16,7 @@ body {
     /* 左右居中对齐 */
     justify-content: center;
 }
+
 /* 整个注册界面的样式设置 */
 .register_mark {
     width: 600px;
@@ -24,63 +26,73 @@ body {
     text-align: center;
     background: white;
 }
+
 /* 注册标识文字的样式设置 */
 .user_register {
     font-size: 40px;
-    color:#145dff;
+    color: #145dff;
     font-weight: bold;
     font-family: "microsoft yahei";
     line-height: 100px;
 }
+
 /* 提示语文字的样式设置 */
-.mark_files{
+.mark_files {
     font-size: 16px;
     margin-top: 10px;
     text-align: left;
     padding-left: 86px;
 }
+
 /* 输入框的样式设置 */
 .input_mark input {
     width: 70%;
     height: 40px;
     margin-bottom: 30px;
 }
+
 /* 提交按钮的样式设置 */
 button {
-    font-size:17px;
+    font-size: 17px;
     color: white;
     background: #145dff;
     border: none;
     height: 50px;
     width: 71.5%;
 }
-button:hover{
+
+button:hover {
     cursor: pointer;
 }
+
 /* 协议整体文字的样式设置 */
-.pact_mark{
+.pact_mark {
     font-size: 16px;
     margin-top: 10px;
     text-align: left;
     padding-left: 86px;
 }
+
 /* 用户协议文字的样式设置 */
 .pact_mark a {
     color: #145dff;
     font-weight: bold;
 }
+
 /* 提示语文字的样式设置 */
-.mark{
+.mark {
     font-size: 16px;
     margin-top: 20px;
     line-height: 40px;
 }
+
 /* 立即登录的样式设置 */
 .mark a {
     color: #145dff;
 }
+
 /* 底部文字的样式设置 */
-.mark_mass{
+.mark_mass {
     font-size: 20px;
     line-height: 30px;
     color: white;
@@ -92,30 +104,34 @@ button:hover{
     left: 49%;
     transform: translate(-49%, 0);
 }
+
 /* 图片的样式设置 */
-.login-form{
+.login-form {
     height: auto;
     width: auto;
     text-align: top left;
     background-repeat: no-repeat;
 }
+
 /* 其他登录方式的样式设计 */
-.other_login p{
+.other_login p {
     font-size: 15px;
     line-height: 40px;
     text-align: center;
 
 }
+
 /* qq登录的样式设计 */
-.other_login .img_png img{
+.other_login .img_png img {
     width: 35px;
     height: 35px;
     background-repeat: no-repeat;
     margin-top: -100px;
     margin-left: -160px;
 }
+
 /* qq登录:当鼠标悬浮在元素上方时,给元素设定的样式 */
-.other_login .img_png img:hover{
+.other_login .img_png img:hover {
     width: 35px;
     height: 35px;
     background-repeat: no-repeat;
@@ -124,16 +140,18 @@ button:hover{
     background: #1E90FF;
     cursor: pointer;
 }
+
 /* wx登录方式的样式设计 */
-.other_login .img_png1 img{
+.other_login .img_png1 img {
     width: 35px;
     height: 35px;
     background-repeat: no-repeat;
     margin-top: -100px;
     margin-right: -160px;
 }
+
 /* wx登录方式:当鼠标悬浮在元素上方时,给元素设定的样式 */
-.other_login .img_png1 img:hover{
+.other_login .img_png1 img:hover {
     width: 35px;
     height: 35px;
     background-repeat: no-repeat;
@@ -142,7 +160,15 @@ button:hover{
     background: #1E90FF;
     cursor: pointer;
 }
+
 .img_list {
     display: flex;
     justify-content: center;
+}
+
+#wx_qrcode {
+    width: 100px;
+    height: 100px;
+    border: 1px solid grey;
+    border-radius: 5px;
 }

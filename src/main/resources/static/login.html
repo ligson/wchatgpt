@@ -26,13 +26,28 @@
             </div>
             <button type="button" id="loginButton">完 成 登 录</button>
             <div class="mark">
-                <!--                <p>没有账号？联系管理员(加微信:jmc01362474或者shu3000f)</p>-->
+                <p>没有账号？联系管理员(加微信:<span id="wx_id"></span>)</p>
+                <p><img src="img/jmc01362474.png" id="wx_qrcode"/></p>
             </div>
         </div>
     </div>
 </form>
 
 <script type="text/javascript">
+    function getCustomInfo() {
+        $.ajax({
+            type: "GET",
+            url: '/wchatgpt-be/api/sys/customerInfo',
+            dataType: 'json',
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.success) {
+                    $("#wx_id").html(data.data.wxId);
+                    $("#wx_qrcode").attr("src", data.data.wxQrCode);
+                }
+            }
+        });
+    }
 
     function checkToken() {
         let token = localStorage.getItem("token");
@@ -61,6 +76,8 @@
 
     $(document).ready(function () {
         checkToken();
+
+        getCustomInfo();
 
         $("#loginButton").click(function () {
             console.log("111");
