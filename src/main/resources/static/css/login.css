@@ -176,3 +176,11 @@ button:hover {
     border: 1px solid grey;
     border-radius: 5px;
 }
+
+.height70 {
+    height: 70px;
+}
+
+.height50 {
+    height: 50px;
+}

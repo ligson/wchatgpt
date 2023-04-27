@@ -120,6 +120,11 @@ $(function () {
         });
     });
 
+    $("#resetPasswordBtn").click(function () {
+        window.location.href = "/wchatgpt-be/resetPassword.html";
+    });
+
+
     $.ajax({
         type: "POST",
         url: '/wchatgpt-be/api/auth/checkLogin',
