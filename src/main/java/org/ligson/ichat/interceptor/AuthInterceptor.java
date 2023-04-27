@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 public class AuthInterceptor implements HandlerInterceptor {
     private static final String[] ignore_urls = new String[]{"/wchatgpt-be/api/sys/.*",
             "/wchatgpt-be/api/auth/.*",
+            "/wchatgpt-be/user-images/.*",
             //static file
             ".*(html)$", ".*(js)$", ".*(css)$", "/wchatgpt-be/css/.*", "/wchatgpt-be/img/.*", "/wchatgpt-be/js/.*"};
     private final UserService userService;
