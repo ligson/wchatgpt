@@ -2,6 +2,7 @@ package org.ligson.ichat.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.ligson.ichat.domain.User;
 import org.ligson.ichat.openai.vo.req.ChatCompletionsReq;
 import org.ligson.ichat.service.OpenAIChatServiceImpl;
 import org.ligson.ichat.service.UserService;
@@ -11,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/api/openai")
@@ -20,6 +24,7 @@ public class OpenAiController {
     private OpenAIChatServiceImpl openAIChatService;
     @Autowired
     private UserService userService;
+    private static Map<String, Date> userLastChat = new ConcurrentHashMap<>();
 
     @PostMapping("/chat")
     public WebResult handle(@RequestBody ChatCompletionsReq completionsReq,
@@ -27,10 +32,20 @@ public class OpenAiController {
         long startTime = System.currentTimeMillis();
         WebResult webResult = new WebResult();
         String token = request.getHeader("token");
-        if (StringUtils.isBlank(token) || userService.getLoginUserByToken(token) == null) {
+        //帮我生成一张沙滩的高清图片
+        User user = userService.getLoginUserByToken(token);
+        if (StringUtils.isBlank(token) || user == null) {
             webResult.setSuccess(false);
             webResult.setErrorMsg("您的登录会话已经过期，请重新登录!");
             return webResult;
+        }
+        Date date = userLastChat.get(user.getName());
+        if (date != null) {
+            if ((date.getTime() - startTime) / 1000.0 < 10) {
+                webResult.setSuccess(false);
+                webResult.setErrorMsg("接口性能有限，请稍候再试!");
+                return webResult;
+            }
         }
         String msg = openAIChatService.chat(completionsReq);
         if (msg != null) {
