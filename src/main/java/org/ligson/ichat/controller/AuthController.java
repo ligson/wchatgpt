@@ -2,6 +2,8 @@ package org.ligson.ichat.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.ligson.ichat.domain.User;
+import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,27 +20,27 @@ import java.util.regex.Pattern;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-z0-9]{6,12}$");
-    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^[a-z0-9_]{8,}$");
 
-
-    @Value("${app.server.registerCode}")
-    private String registerCode;
     @Autowired
-    private ServerUserContext serverUserContext;
+    private UserService userService;
 
     @PostMapping("/login")
     public WebResult login(@RequestBody LoginDTO req) throws IOException {
-        return serverUserContext.login(req.getUsername(), req.getPassword());
+        return userService.login(req.getUsername(), req.getPassword());
+    }
+
+    @PostMapping("/logout")
+    public WebResult logout(@RequestBody TokenDTO tokenDTO) {
+        return userService.logout(tokenDTO.getToken());
     }
 
     @PostMapping("/checkLogin")
     public WebResult checkLogin(@RequestBody TokenDTO tokenDTO) {
         WebResult webResult = WebResult.newInstance();
-        UserInfoVo userInfo = serverUserContext.getLoginUserByToken(tokenDTO.getToken());
+        User userInfo = userService.getLoginUserByToken(tokenDTO.getToken());
         if (userInfo != null) {
             webResult.setSuccess(true);
-            webResult.putData("username", userInfo.getUsername());
+            webResult.putData("username", userInfo.getName());
             webResult.putData("token", tokenDTO.getToken());
         } else {
             webResult.setSuccess(false);
@@ -49,28 +51,6 @@ public class AuthController {
 
     @PostMapping("/register")
     public WebResult register(@RequestBody RegisterDTO req) {
-        WebResult webResult = WebResult.newInstance();
-        if (StringUtils.isNotBlank(req.getUsername()) && StringUtils.isNotBlank(req.getPassword()) && StringUtils.isNotBlank(req.getRegisterCode())) {
-            if (!registerCode.equals(req.getRegisterCode())) {
-                webResult.setErrorMsg("注册码错误!");
-                return webResult;
-            }
-
-            Matcher usernameMatcher = USERNAME_PATTERN.matcher(req.getUsername());
-            if (!usernameMatcher.matches()) {
-                webResult.setErrorMsg("账号格式错误!");
-                return webResult;
-            }
-
-            Matcher passwordMatcher = PASSWORD_PATTERN.matcher(req.getPassword());
-            if (!passwordMatcher.matches()) {
-                webResult.setErrorMsg("密码格式错误!");
-                return webResult;
-            }
-            return serverUserContext.registerUser(req.getUsername(), req.getPassword(), "1");
-        } else {
-            webResult.setErrorMsg("参数格式错误!");
-            return webResult;
-        }
+        return userService.registerUser(req);
     }
 }

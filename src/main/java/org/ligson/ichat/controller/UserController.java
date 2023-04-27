@@ -1,87 +1,35 @@
 package org.ligson.ichat.controller;
 
-import org.apache.commons.lang3.StringUtils;
-import org.ligson.ichat.controller.ServerUserContext;
-import org.ligson.ichat.vo.ResetPwdDTO;
+import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.RegisterDTO;
+import org.ligson.ichat.vo.ResetPwdDTO;
 import org.ligson.ichat.vo.WebResult;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
-    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[a-z0-9]{6,12}$");
-    private static final Pattern PASSWORD_PATTERN = Pattern.compile("^[a-z0-9_]{8,}$");
-    @Value("${app.server.registerCode}")
-    private String registerCode;
-    @Autowired
-    private ServerUserContext serverUserContext;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping("/resetPassword")
     public WebResult resetPassword(@RequestBody ResetPwdDTO req) {
-        WebResult webResult = WebResult.newInstance();
-        if (StringUtils.isNotBlank(req.getUsername()) && StringUtils.isNotBlank(req.getOldPassword()) && StringUtils.isNotBlank(req.getNewPassword())) {
-            Matcher passwordMatcher = PASSWORD_PATTERN.matcher(req.getNewPassword());
-            if (!passwordMatcher.matches()) {
-                webResult.setErrorMsg("密码格式错误!");
-                return webResult;
-            }
-            return serverUserContext.resetPassword(req.getUsername(), req.getOldPassword(), req.getNewPassword());
-        } else {
-            webResult.setErrorMsg("参数格式错误!");
-            return webResult;
-        }
+        return userService.resetPassword(req.getUsername(), req.getOldPassword(), req.getNewPassword());
     }
 
     @PostMapping("/upgrade")
     public WebResult upgrade(@RequestBody RegisterDTO req) {
-        WebResult webResult = new WebResult();
-        if (StringUtils.isNotBlank(req.getUsername()) && StringUtils.isNotBlank(req.getRegisterCode())) {
-            if (!registerCode.equals(req.getRegisterCode())) {
-                webResult.setErrorMsg("注册码错误!");
-                return webResult;
-            }
-
-            Matcher usernameMatcher = USERNAME_PATTERN.matcher(req.getUsername());
-            if (!usernameMatcher.matches()) {
-                webResult.setErrorMsg("账号格式错误!");
-                return webResult;
-            }
-
-            return serverUserContext.upgrade(req.getUsername());
-        } else {
-            webResult.setErrorMsg("参数格式错误!");
-            return webResult;
-        }
+        return userService.upgrade(req.getUsername(), req.getRegisterCode());
     }
 
     @PostMapping("/delete")
     public WebResult delete(@RequestBody RegisterDTO req) {
-        WebResult webResult = new WebResult();
-        if (StringUtils.isNotBlank(req.getUsername()) && StringUtils.isNotBlank(req.getRegisterCode())) {
-            if (!registerCode.equals(req.getRegisterCode())) {
-                webResult.setErrorMsg("注册码错误!");
-                return webResult;
-            }
-
-            Matcher usernameMatcher = USERNAME_PATTERN.matcher(req.getUsername());
-            if (!usernameMatcher.matches()) {
-                webResult.setErrorMsg("账号格式错误!");
-                return webResult;
-            }
-
-            return serverUserContext.deleteUser(req.getUsername());
-        } else {
-            webResult.setErrorMsg("参数格式错误!");
-            return webResult;
-        }
+        return userService.deleteUser(req.getUsername(), req.getRegisterCode());
     }
 }

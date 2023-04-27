@@ -62,10 +62,10 @@ function req_msg(msg) {
 
 function resizeChatBox() {
     $('.chat-box').height($(window).height());
-    $('.chat-history').height($('.chat-box').height() - $(".chat-input").outerHeight());
+    //$('.chat-history').height($('.chat-box').height() - $(".chat-input").outerHeight() - $(".chat-top").outerHeight());
 }
 
-$(function () {
+function resizeUI() {
     // adjust chat box height on window resize
     $(window).resize(function () {
         resizeChatBox();
@@ -85,6 +85,10 @@ $(function () {
     $('.chat-input textarea').blur(function () {
         resizeChatBox();
     });
+}
+
+$(function () {
+    resizeUI();
 
     $("#sendBtn").click(function () {
         req_msg($(".my_input").val())
@@ -94,7 +98,26 @@ $(function () {
         if (event.ctrlKey && event.keyCode == 13) {
             req_msg($(".my_input").val())
         }
-        ;
+    });
+
+    $("#logoutBtn").click(function () {
+        $.ajax({
+            type: "POST",
+            url: '/wchatgpt-be/api/auth/logout',
+            dataType: 'json',
+            contentType: 'application/json',
+            async: false,
+            data: '{"token": "' + localStorage.getItem("token") + '"}',
+            success: function (data) {
+                if (data.success) {
+                    localStorage.removeItem("userInfo", data.data.username);
+                    localStorage.removeItem("token", data.data.token);
+                    window.location.href = "/wchatgpt-be/login.html"; // 跳转到登录页面
+                } else {
+                    alert(data.errorMsg)
+                }
+            }
+        });
     });
 
     $.ajax({
@@ -118,6 +141,7 @@ $(function () {
     if (localStorage.getItem("userInfo") == null) { // 判断本地存储中是否有用户登录信息
         window.location.href = "/wchatgpt-be/login.html"; // 跳转到登录页面
     }
+    $(".chat-username").html(localStorage.getItem("userInfo"))
     //$("#userInfo").text(localStorage.getItem("userInfo"));
 
 });
