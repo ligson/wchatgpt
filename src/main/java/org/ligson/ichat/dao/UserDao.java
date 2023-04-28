@@ -103,13 +103,13 @@ public class UserDao {
             fis.close();
             StringBuilder builder = new StringBuilder();
             for (String line : userFileContent.split("\n")) {
-                if (line.startsWith(user.getName())) {
-                    continue;
+                if (!line.startsWith(user.getName()) || !line.split(",")[0].equals(user.getName())) {
+                    builder.append(line).append("\n");
+                } else {
+                    String newline = convertUser2String(user);
+                    builder.append(newline).append("\n");
                 }
-                builder.append(user).append("\n");
             }
-            String line = convertUser2String(user);
-            builder.append(line).append("\n");
             FileOutputStream fos = new FileOutputStream(userFile1);
             IOUtils.write(builder.toString(), fos, StandardCharsets.UTF_8);
             fos.close();
@@ -118,6 +118,10 @@ public class UserDao {
             log.error(e.getMessage());
             throw new InnerException(e);
         }
+    }
+
+    public static void main(String[] args) {
+
     }
 
     public void deleteByName(String username) {
