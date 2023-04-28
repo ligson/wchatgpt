@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#domain=https://ichat.x-assn.xyz
+domain=https://ichat.x-assn.xyz
 
 while read line
 do
