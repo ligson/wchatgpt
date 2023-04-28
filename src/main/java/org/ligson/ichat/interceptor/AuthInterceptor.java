@@ -21,6 +21,8 @@ public class AuthInterceptor implements HandlerInterceptor {
     private static final String[] ignore_urls = new String[]{"/wchatgpt-be/api/sys/.*",
             "/wchatgpt-be/api/auth/.*",
             "/wchatgpt-be/user-images/.*",
+            "/wchatgpt-be/api/user/upgrade.*",
+            "/wchatgpt-be/api/user/resetPassword.*",
             //static file
             ".*(html)$", ".*(js)$", ".*(css)$", "/wchatgpt-be/css/.*", "/wchatgpt-be/img/.*", "/wchatgpt-be/js/.*"};
     private final UserService userService;
