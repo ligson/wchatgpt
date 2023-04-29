@@ -3,7 +3,7 @@
 <head>
     <title>聊天</title>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maxinum-scale=1,user-scalable=no">
     <link href="./js/lib/bootstrap-4.6.2-dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- jQuery and JavaScript Bundle with Popper -->
     <script src="js/lib/jquery.min.js"></script>
@@ -33,6 +33,7 @@
 
 <div class="chat-box">
     <div class="chat-top">
+        <div class="float-left">AI会话</div>
         <div class="dropdown float-right">
             <button class="btn btn-primary dropdown-toggle chat-username" type="button" data-toggle="dropdown"
                     aria-expanded="false">
@@ -49,8 +50,13 @@
 
     </div>
     <div class="chat-input">
-        <textarea class="form-control my_input" placeholder="输入你的问题....(Ctrl + Enter = 发送)"></textarea>
-        <button class="btn btn-primary" id="sendBtn">发送</button>
+        <div class="input-group">
+            <input type="text" class="form-control my_input" placeholder="输入你的问题..."
+                   enterkeyhint="send" aria-describedby="sendBtn"/>
+            <div class="input-group-append">
+                <button class="btn btn-primary" type="button" id="sendBtn">发送</button>
+            </div>
+        </div>
     </div>
 </div>
 

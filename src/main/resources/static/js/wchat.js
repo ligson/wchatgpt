@@ -80,9 +80,9 @@ $(function () {
         req_msg($(".my_input").val())
     });
 
-    $('body').keydown(function () {
-        if (event.ctrlKey && event.keyCode == 13) {
-            req_msg($(".my_input").val())
+    $('body').keydown(function (e) {
+        if (e.keyCode === 13) {
+            $("#sendBtn").click()
         }
     });
 

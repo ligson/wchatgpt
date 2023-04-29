@@ -46,7 +46,7 @@ html body {
     height: 60px;
     background-color: #007bff;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     padding: 10px;
     color: #FFF;
@@ -64,14 +64,3 @@ html body {
 }
 
 
-
-.chat-input textarea {
-    height: 40px;
-    flex-grow: 1;
-    margin-right: 10px;
-}
-
-.chat-input button {
-    height: 40px;
-    width: 80px;
-}
