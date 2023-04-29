@@ -142,6 +142,7 @@ public class UserDao {
             FileOutputStream fos = new FileOutputStream(users);
             IOUtils.write(stringBuilder.toString(), fos, StandardCharsets.UTF_8);
             fos.close();
+            userMap.remove(username);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
             throw new InnerException(e);

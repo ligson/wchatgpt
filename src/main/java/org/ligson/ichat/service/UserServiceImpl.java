@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
                     count++;
                 }
             }
-            if (count > 2) {
+            if (count > 3) {
                 webResult.setSuccess(false);
                 webResult.setErrorMsg("最多可以使用两个设备登录，可以退出之前登录后再试");
                 return webResult;
