@@ -46,7 +46,7 @@ html body {
     height: 60px;
     background-color: #007bff;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     padding: 10px;
     color: #FFF;
@@ -63,14 +63,7 @@ html body {
     padding: 10px;
 }
 
-.chat-logout button {
-    color: #FFF;
-    font-weight: bold;
-}
 
-.chat-logout button:hover {
-    cursor: pointer;
-}
 
 .chat-input textarea {
     height: 40px;

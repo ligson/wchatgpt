@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="js/lib/jquery.min.js"></script>
+    <script src="js/http.js"></script>
     <title>用户登录页面</title>
     <link rel="stylesheet" href="./css/login.css">
 </head>
@@ -29,86 +30,6 @@
     </div>
 </form>
 
-<script type="text/javascript">
-    function getCustomInfo() {
-        $.ajax({
-            type: "GET",
-            url: '/wchatgpt-be/api/sys/customerInfo',
-            dataType: 'json',
-            contentType: 'application/json',
-            success: function (data) {
-                if (data.success) {
-                    $("#wx_id").html(data.data.wxId);
-                    $("#wx_qrcode").attr("src", data.data.wxQrCode);
-                    if (data.data.wxId !== 'abroket') {
-                        $(".user_register").html("登录");
-                    }
-                }
-            }
-        });
-    }
-
-    function checkToken() {
-        let token = localStorage.getItem("token");
-        if (token) {
-            $.ajax({
-                type: "POST",
-                url: '/wchatgpt-be/api/auth/checkLogin',
-                dataType: 'json',
-                contentType: 'application/json',
-                async: false,
-                data: JSON.stringify({ token: token }),
-                success: function (data) {
-                    if (data.success) {
-                        localStorage.setItem("userInfo", data.data.username);
-                        localStorage.setItem("token", data.data.token);
-                        window.location.href = "/wchatgpt-be/index.html"; // 跳转到登录页面
-                    } else {
-                        localStorage.removeItem("userInfo");
-                        localStorage.removeItem("token");
-                        //alert(data.errorMsg);
-                        //alert("您的登录会话已经过期，请重新登录！")
-                    }
-                }
-            });
-        }
-    }
-
-    $(document).ready(function () {
-        checkToken();
-
-        getCustomInfo();
-
-        $("#loginButton").click(function () {
-            console.log("111");
-            let username = $("input[name='username']").val();
-            let password = $("input[name='password']").val();
-            if (!username || !password) {
-                alert("请输入用户名或者密码")
-                return
-            }
-            $.ajax({
-                type: "POST",
-                url: '/wchatgpt-be/api/auth/login',
-                dataType: 'json',
-                contentType: 'application/json',
-                data: JSON.stringify({ username: username, password: password }),
-                success: function (data) {
-                    if (data.success) {
-                        localStorage.setItem("userInfo", data.data.username);
-                        localStorage.setItem("token", data.data.token);
-                        window.location = "/wchatgpt-be/index.html";
-                    } else {
-                        localStorage.removeItem("userInfo");
-                        localStorage.removeItem("token");
-                        alert(data.errorMsg);
-                    }
-                }
-            });
-        });
-    });
-
-
-</script>
+<script type="text/javascript" src="js/login.js"></script>
 </body>
 </html>

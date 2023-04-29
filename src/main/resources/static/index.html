@@ -12,6 +12,7 @@
     <script src="./js/lib/highlight.js-11.2.0/highlight.min.js"></script>
     <script src="./js/lib/marked-2.1.3/marked.min.js"></script>
     <link rel="stylesheet" href="./css/chat.css">
+    <script src="js/http.js"></script>
     <script src="js/wchat.js"></script>
 
 </head>
@@ -32,12 +33,16 @@
 
 <div class="chat-box">
     <div class="chat-top">
-        <div class="chat-username">
-            xxxxx
-        </div>
-        <div class="chat-logout">
-            <button class="btn btn-primary" id="resetPasswordBtn">重置密码</button>
-            <button class="btn btn-primary" id="logoutBtn">退出</button>
+        <div class="dropdown float-right">
+            <button class="btn btn-primary dropdown-toggle chat-username" type="button" data-toggle="dropdown"
+                    aria-expanded="false">
+                用户
+            </button>
+            <div class="dropdown-menu">
+                <button class="btn btn-primary dropdown-item" id="resetPasswordBtn">重置密码</button>
+                <div class="dropdown-divider"></div>
+                <button class="btn btn-primary dropdown-item" id="logoutBtn">退出</button>
+            </div>
         </div>
     </div>
     <div class="chat-history">

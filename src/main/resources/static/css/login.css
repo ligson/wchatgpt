@@ -7,7 +7,7 @@ body {
 
 /* 盒子外围的样式设置 */
 .box2 {
-    width: 100%;
+    width: 80%;
     /*height: 100vh;*/
     /* 弹性布局 */
     display: flex;
@@ -15,6 +15,7 @@ body {
     align-items: center;
     /* 左右居中对齐 */
     justify-content: center;
+    margin: 0 auto;
 }
 
 /* 整个注册界面的样式设置 */
