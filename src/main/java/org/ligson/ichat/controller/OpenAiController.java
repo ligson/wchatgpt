@@ -47,6 +47,13 @@ public class OpenAiController {
                 return webResult;
             }
         }
+        if (user.getTimes() <= 0) {
+            webResult.setSuccess(false);
+            webResult.setErrorMsg("您的使用次数已经用完，请联系管理员续费!");
+            return webResult;
+        }
+        user.setTimes(user.getTimes() - 1);
+
         String msg = openAIChatService.chat(completionsReq);
         if (msg != null) {
             webResult.setSuccess(true);

@@ -15,4 +15,5 @@ public class User {
     private String password;
     private Integer level;
     private Date createdTime;
+    private Integer times;
 }

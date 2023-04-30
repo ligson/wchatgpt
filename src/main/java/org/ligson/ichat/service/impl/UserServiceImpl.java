@@ -4,10 +4,8 @@ package org.ligson.ichat.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.time.DateUtils;
 import org.ligson.ichat.dao.UserDao;
 import org.ligson.ichat.domain.User;
-import org.ligson.ichat.service.CaptchaService;
 import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.RegisterDTO;
 import org.ligson.ichat.vo.WebResult;
@@ -16,8 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,26 +65,21 @@ public class UserServiceImpl implements UserService {
             }
 
             if (vo.getPassword().equals(password)) {
-                if (vo.getLevel() == 1) {
-                    Date endDate = DateUtils.addDays(vo.getCreatedTime(), 2);
-                    Date nowDate = Calendar.getInstance().getTime();
-                    if (nowDate.getTime() < endDate.getTime()) {
-                        String token = UUID.randomUUID().toString();
-                        webResult.setSuccess(true);
-                        webResult.putData("username", username);
-                        webResult.putData("token", token);
-                        onlineUserMap.put(token, vo);
+                if (vo.getTimes() <= 0) {
+                    if (vo.getLevel() == 1) {
+                        webResult.setSuccess(false);
+                        webResult.setErrorMsg("成本有限,免费用户只能体验20次，请联系管理员付费,请谅解");
                     } else {
                         webResult.setSuccess(false);
-                        webResult.putData("msg", "成本有限,免费用户只能用两天，请联系管理员付费,请谅解");
+                        webResult.setErrorMsg("早期用户只能使用5000次，请联系管理员续费,请谅解");
                     }
-                } else {
-                    String token = UUID.randomUUID().toString();
-                    webResult.setSuccess(true);
-                    webResult.putData("username", username);
-                    webResult.putData("token", token);
-                    onlineUserMap.put(token, vo);
+                    return webResult;
                 }
+                String token = UUID.randomUUID().toString();
+                webResult.setSuccess(true);
+                webResult.putData("username", username);
+                webResult.putData("token", token);
+                onlineUserMap.put(token, vo);
             } else {
                 webResult.setSuccess(false);
                 webResult.setErrorMsg("密码错误");
@@ -133,6 +124,7 @@ public class UserServiceImpl implements UserService {
             user.setName(req.getUsername());
             user.setPassword(req.getPassword());
             user.setLevel(1);
+            user.setTimes(20);
             userDao.insert(user);
             webResult.setSuccess(true);
             return webResult;
@@ -184,6 +176,7 @@ public class UserServiceImpl implements UserService {
                 return webResult;
             }
             vo.setLevel(2);
+            vo.setTimes(5000);
             userDao.update(vo);
             webResult.setSuccess(true);
         } else {

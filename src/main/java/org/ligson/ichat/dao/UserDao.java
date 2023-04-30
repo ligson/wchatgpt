@@ -31,6 +31,7 @@ public class UserDao {
     @PostConstruct
     public void init() {
         try {
+            fixUserData();
             File file = new File(userFile);
             BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
             String line;
@@ -51,24 +52,56 @@ public class UserDao {
         }
     }
 
+    private void fixUserData() {
+        try {
+            File userFile1 = new File(userFile);
+            FileInputStream fis = new FileInputStream(userFile1);
+            String userFileContent = IOUtils.toString(fis, StandardCharsets.UTF_8);
+            fis.close();
+            StringBuilder builder = new StringBuilder();
+            for (String line : userFileContent.split("\n")) {
+                User user = convertString2User(line);
+                assert user != null;
+                builder.append(convertUser2String(user)).append("\n");
+            }
+            FileOutputStream fos = new FileOutputStream(userFile1);
+            IOUtils.write(builder.toString(), fos, StandardCharsets.UTF_8);
+            fos.close();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw new InnerException(e);
+        }
+    }
+
     private String convertUser2String(User user) {
         String registerDateStr = DateFormatUtils.format(user.getCreatedTime(), "yyyyMMddHHmmss");
-        return String.join(",", user.getName(), user.getPassword(), user.getLevel() + "", registerDateStr);
+        return String.join(",", user.getName(), user.getPassword(), user.getLevel() + "", registerDateStr, user.getTimes() + "");
     }
 
     private User convertString2User(String line) {
         String[] users = line.split(",");
+
         if (users.length == 4) {
+            String[] users2 = new String[5];
+            users2[0] = users[0];
+            users2[1] = users[1];
+            users2[2] = users[2];
+            users2[3] = users[3];
+            users2[4] = users[2].equals("1") ? "20" : "5000";
+            users = users2;
+        }
+        if (users.length == 5) {
             String username = users[0];
             String password = users[1];
             String level = users[2];
-            Date registerDate = null;
+            String times = users[4];
+            Date registerDate;
             try {
                 registerDate = DateUtils.parseDate(users[3], "yyyyMMddHHmmss");
             } catch (ParseException e) {
                 throw new InnerException(e);
             }
-            return new User("", username, password, Integer.parseInt(level), registerDate);
+            return new User("", username, password, Integer.parseInt(level), registerDate, Integer.parseInt(times));
         }
         return null;
     }
@@ -95,7 +128,7 @@ public class UserDao {
         return userMap.get(name);
     }
 
-    public void update(User user) {
+    public synchronized void update(User user) {
         try {
             File userFile1 = new File(userFile);
             FileInputStream fis = new FileInputStream(userFile1);
@@ -120,11 +153,7 @@ public class UserDao {
         }
     }
 
-    public static void main(String[] args) {
-
-    }
-
-    public void deleteByName(String username) {
+    public synchronized void deleteByName(String username) {
         File users = new File(userFile);
         try {
             BufferedReader reader = new BufferedReader(new FileReader(users));
@@ -145,6 +174,39 @@ public class UserDao {
             userMap.remove(username);
         } catch (IOException e) {
             log.error(e.getMessage(), e);
+            throw new InnerException(e);
+        }
+    }
+
+    public synchronized void syncUserTimes() {
+        try {
+            File userFile1 = new File(userFile);
+            FileInputStream fis = new FileInputStream(userFile1);
+            String userFileContent = IOUtils.toString(fis, StandardCharsets.UTF_8);
+            fis.close();
+            StringBuilder builder = new StringBuilder();
+            for (String line : userFileContent.split("\n")) {
+                User dbUser = convertString2User(line);
+                if (dbUser == null) {
+                    continue;
+                }
+                User appUser = userMap.get(dbUser.getName());
+                if (appUser == null) {
+                    userMap.put(dbUser.getName(), dbUser);
+                    appUser = dbUser;
+                }
+                if (dbUser.getTimes().equals(appUser.getTimes())) {
+                    builder.append(line).append("\n");
+                } else {
+                    String newline = convertUser2String(appUser);
+                    builder.append(newline).append("\n");
+                }
+            }
+            FileOutputStream fos = new FileOutputStream(userFile1);
+            IOUtils.write(builder.toString(), fos, StandardCharsets.UTF_8);
+            fos.close();
+        } catch (Exception e) {
+            log.error(e.getMessage());
             throw new InnerException(e);
         }
     }
