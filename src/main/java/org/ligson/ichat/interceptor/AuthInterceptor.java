@@ -3,6 +3,7 @@ package org.ligson.ichat.interceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.ligson.ichat.context.SessionContext;
 import org.ligson.ichat.domain.User;
+import org.ligson.ichat.domain.WindowSize;
 import org.ligson.ichat.serializer.CruxSerializer;
 import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.WebResult;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -21,7 +23,6 @@ public class AuthInterceptor implements HandlerInterceptor {
     private static final String[] ignore_urls = new String[]{"/wchatgpt-be/api/sys/.*",
             "/wchatgpt-be/api/auth/.*",
             "/wchatgpt-be/user-images/.*",
-            "/wchatgpt-be/api/user/upgrade.*",
             "/wchatgpt-be/api/user/upgrade.*",
             "/wchatgpt-be/api/user/delete.*",
             "/wchatgpt-be/api/user/resetPassword.*",
@@ -49,6 +50,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 return true;
             }
         }
+        windowSize(request);
         String token = request.getHeader("token");
         User user = userService.getLoginUserByToken(token);
         if (user == null) {
@@ -60,5 +62,19 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
         sessionContext.setCurrentUser(user);
         return true;
+    }
+
+    private void windowSize(HttpServletRequest request) {
+        String winWidth = request.getHeader("winWidth");
+        String winHeight = request.getHeader("winHeight");
+        WindowSize windowSize = new WindowSize();
+        windowSize.setWidth(Integer.parseInt(Optional.ofNullable(winWidth).orElse("350")));
+        windowSize.setHeight(Integer.parseInt(Optional.ofNullable(winHeight).orElse("550")));
+        sessionContext.setWindowSize(windowSize);
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        sessionContext.removeWindowSize();
     }
 }

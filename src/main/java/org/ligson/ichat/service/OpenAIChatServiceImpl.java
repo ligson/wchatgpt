@@ -2,6 +2,8 @@ package org.ligson.ichat.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.ligson.ichat.context.SessionContext;
+import org.ligson.ichat.domain.WindowSize;
 import org.ligson.ichat.images.GenerateImageService;
 import org.ligson.ichat.openai.OpenAiClient;
 import org.ligson.ichat.openai.vo.Model;
@@ -38,6 +40,8 @@ public class OpenAIChatServiceImpl implements ChatService {
     private String domainUrl;
     @Autowired
     private GenerateImageService imageService;
+    @Autowired
+    private SessionContext sessionContext;
 
     public OpenAIChatServiceImpl() {
         log.debug("---");
@@ -94,11 +98,34 @@ public class OpenAIChatServiceImpl implements ChatService {
                     log.error(e.getMessage(), e);
                     continue;
                 }
-                String imgUrl = domainUrl + "/user-images/" + file.getName();
-                builder.append("<img src='").append(imgUrl).append("' style=\"width: 300px;height: 490px;\"/>").append("<br/>");
+                if (file.length() == 0) {
+                    builder.append("图片生成失败，请重新生成<br/>");
+                } else {
+                    String imgUrl = domainUrl + "/user-images/" + file.getName();
+                    builder.append("<img src='").append(imgUrl).append("' ").append(getStyle()).append("/>").append("<br/>");
+                }
             }
         }
         return builder.toString();
+    }
+
+    private String getStyle() {
+        String fmt = "style=\"width: %dpx; height: %dpx;\"";
+        WindowSize windowSize = sessionContext.getWindowSize();
+        int winWidth = windowSize.getWidth();
+        int winHeight = windowSize.getHeight();
+        int imageWidth = 960;
+        int imageHeight = 1568;
+        int num = 10;
+        for (int i = 10; i > 1; i--) {
+            if ((imageWidth * (i * 0.1f)) < winWidth && (imageHeight * (i * 0.1f)) < winHeight) {
+                num = i;
+                break;
+            }
+        }
+        float w = imageWidth * (num * 0.1f);
+        float h = imageHeight * (num * 0.1f);
+        return String.format(fmt, Math.round(w), Math.round(h));
     }
 
     @Override

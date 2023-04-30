@@ -104,9 +104,4 @@ public class GenerateImageService {
         ResponseEntity<DrawResult> res = restTemplate.exchange(url, HttpMethod.GET, httpEntity, DrawResult.class);
         return res.getBody();
     }
-
-    public static void main(String[] args) {
-        String imageUrl = new GenerateImageService().imageGenerate("画一只小鸟");
-        System.out.println(imageUrl);
-    }
 }

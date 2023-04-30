@@ -7,7 +7,7 @@ app:
     port: 服务器端口
     domain-url: https://xx
     registerCode: "admin"
-    userFile: "/data/users.txt"
+    userFile: "/Users/jinmancang1/work/repository/wchatgpt/users.txt"
   wx:
     token: 微信token
     appId: xx

@@ -1,14 +1,9 @@
 function doPost(url, data, callback) {
-    let headers = {}
-    let token = localStorage.getItem("token")
-    if (token) {
-        headers.token = token
-    }
     $.ajax({
         url: url,
         method: "POST",
         dataType: "json",
-        headers: headers,
+        headers: getHeaders(),
         contentType: "application/json",
         data: JSON.stringify(data),
         success: function (data) {
@@ -23,19 +18,25 @@ function doPost(url, data, callback) {
 }
 
 function doGet(url, callback) {
-    let headers = {}
-    let token = localStorage.getItem("token")
-    if (token) {
-        headers.token = token
-    }
     $.ajax({
         type: "GET",
         url: url,
         dataType: 'json',
-        headers: headers,
+        headers: getHeaders(),
         contentType: 'application/json',
         success: function (data) {
             callback(data)
         }
     });
+}
+
+function getHeaders(){
+    let headers = {}
+    let token = localStorage.getItem("token")
+    if (token) {
+        headers.token = token
+    }
+    headers.winWidth = document.body.clientWidth
+    headers.winHeight = document.body.clientHeight
+    return headers;
 }
