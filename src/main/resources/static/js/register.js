@@ -18,29 +18,22 @@ $(document).ready(function () {
             alert("两次密码输入不一致")
             return
         }
-        let register_code = $("input[name='register_code']").val();
-        if (!register_code) {
-            alert("请输入注册码!")
+        let captcha_code = $("input[name='captcha_code']").val();
+        if (!captcha_code) {
+            alert("请输入验证码!")
             return
         }
 
-        doPost('/wchatgpt-be/api/auth/register',{ username: username, password: password, register_code: register_code },function (data) {
+        let captcha_key = $("input[name='captcha_key']").val();
+
+        doPost('/wchatgpt-be/api/auth/register',
+        { username: username, password: password, captcha_code: captcha_code, captcha_key: captcha_key}
+        ,function (data) {
             if (data.success) {
                 alert("注册成功!");
             } else {
                 alert("注册失败," + data.errorMsg);
             }
-        })
-        $.ajax({
-            type: "POST",
-            url: '/wchatgpt-be/api/auth/register',
-            contentType: "application/json",
-            dataType: 'json',
-            data: JSON.stringify({ username: username, password: password, register_code: register_code }),
-            success: function (data) {
-
-            },
-
         });
     });
 });

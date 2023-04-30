@@ -1,20 +1,14 @@
 package org.ligson.ichat.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.ligson.ichat.domain.User;
+import org.ligson.ichat.service.CaptchaService;
 import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Slf4j
 @RestController
@@ -24,8 +18,15 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private CaptchaService captchaService;
+
     @PostMapping("/login")
     public WebResult login(@RequestBody LoginDTO req) throws IOException {
+        WebResult captchaRes = captchaService.verify(Integer.valueOf(req.getCaptchaKey()), req.getCaptchaCode());
+        if (!captchaRes.isSuccess()) {
+            return captchaRes;
+        }
         return userService.login(req.getUsername(), req.getPassword());
     }
 
@@ -51,6 +52,21 @@ public class AuthController {
 
     @PostMapping("/register")
     public WebResult register(@RequestBody RegisterDTO req) {
+        WebResult captchaRes = captchaService.verify(Integer.valueOf(req.getCaptchaKey()), req.getCaptchaCode());
+        if (!captchaRes.isSuccess()) {
+            return captchaRes;
+        }
         return userService.registerUser(req);
     }
+
+    @GetMapping("/getCaptcha")
+    public WebResult getCaptcha() {
+        return captchaService.generate();
+    }
+
+    @PostMapping("/verifyCaptcha")
+    public WebResult verify(@RequestBody CaptchaDTO req) {
+        return captchaService.verify(req.getCaptchaKey(), req.getUserInputCode());
+    }
+
 }

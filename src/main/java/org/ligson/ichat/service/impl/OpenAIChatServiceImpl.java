@@ -1,4 +1,4 @@
-package org.ligson.ichat.service;
+package org.ligson.ichat.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +11,7 @@ import org.ligson.ichat.openai.vo.ModelResult;
 import org.ligson.ichat.openai.vo.req.*;
 import org.ligson.ichat.openai.vo.res.*;
 import org.ligson.ichat.serializer.CruxSerializer;
+import org.ligson.ichat.service.ChatService;
 import org.ligson.ichat.util.MyHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

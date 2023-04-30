@@ -5,7 +5,7 @@ app:
       qr_code: xx
   server:
     port: 服务器端口
-    domain-url: https://xx
+    domain-url: http://127.0.0.1:8080/wchatgpt-be
     registerCode: "admin"
     userFile: "/Users/jinmancang1/work/repository/wchatgpt/users.txt"
   wx:

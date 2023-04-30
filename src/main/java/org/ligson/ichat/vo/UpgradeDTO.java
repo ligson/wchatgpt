@@ -4,15 +4,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class RegisterDTO {
+public class UpgradeDTO {
 
     private String username;
 
     private String password;
 
-    @JsonProperty("captcha_key")
-    private String captchaKey;
-
-    @JsonProperty("captcha_code")
-    private String captchaCode;
+    @JsonProperty("register_code")
+    private String registerCode;
 }

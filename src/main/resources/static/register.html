@@ -24,7 +24,9 @@
                 <input type="password" name="password2" placeholder="请再次输入密码">
             </div>
             <div class="input_mark">
-                <input type="text" name="register_code" placeholder="注册码">
+                <input type="text" name="captcha_code" placeholder="验证码" class="captcha_code">
+                <img name="captcha_img" src="img/captcha.png" class="captcha_img"/>
+                <input type="hidden" name="captcha_key" placeholder="验证码">
             </div>
             <button type="button">完 成 注 册</button>
 
@@ -44,7 +46,7 @@
     </div>
 </form>
 
-
+<script src="js/captcha.js"></script>
 <script type="text/javascript" src="js/register.js">
 
 </script>

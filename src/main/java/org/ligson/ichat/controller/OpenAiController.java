@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.ligson.ichat.domain.User;
 import org.ligson.ichat.openai.vo.req.ChatCompletionsReq;
-import org.ligson.ichat.service.OpenAIChatServiceImpl;
+import org.ligson.ichat.service.impl.OpenAIChatServiceImpl;
 import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.WebResult;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -3,6 +3,7 @@ package org.ligson.ichat.controller;
 import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.RegisterDTO;
 import org.ligson.ichat.vo.ResetPwdDTO;
+import org.ligson.ichat.vo.UpgradeDTO;
 import org.ligson.ichat.vo.WebResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,12 +25,12 @@ public class UserController {
     }
 
     @PostMapping("/upgrade")
-    public WebResult upgrade(@RequestBody RegisterDTO req) {
+    public WebResult upgrade(@RequestBody UpgradeDTO req) {
         return userService.upgrade(req.getUsername(), req.getRegisterCode());
     }
 
     @PostMapping("/delete")
-    public WebResult delete(@RequestBody RegisterDTO req) {
+    public WebResult delete(@RequestBody UpgradeDTO req) {
         return userService.deleteUser(req.getUsername(), req.getRegisterCode());
     }
 }

@@ -13,13 +13,18 @@
 <form action="" method="get">
     <div class="box2">
         <div class="register_mark">
-            <div class="user_register"><img id="wx_logo" src="#"/></div>
+            <div class="user_register"><img id="wx_logo" src=""/></div>
 
             <div class="input_mark">
                 <input type="text" name="username" placeholder="请输入账号">
             </div>
             <div class="input_mark">
                 <input type="password" name="password" placeholder="请输入密码">
+            </div>
+            <div class="input_mark">
+                <input type="text" name="captcha_code" placeholder="验证码" class="captcha_code">
+                <img name="captcha_img" src="img/captcha.png" class="captcha_img"/>
+                <input type="hidden" name="captcha_key" placeholder="验证码">
             </div>
             <button type="button" id="loginButton">完 成 登 录</button>
             <div class="mark">
@@ -29,7 +34,7 @@
         </div>
     </div>
 </form>
-
+<script src="js/captcha.js"></script>
 <script type="text/javascript" src="js/login.js"></script>
 </body>
 </html>

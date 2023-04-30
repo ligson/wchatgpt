@@ -185,3 +185,22 @@ button:hover {
 .height50 {
     height: 50px;
 }
+
+img[src=""] {
+    opacity: 0;
+}
+
+.input_mark .captcha_code {
+    width: 51%;
+    float: left;
+    margin-left: 14%;
+}
+.input_mark .captcha_img {
+    width: calc(18% - 3px);
+    height: 40px;
+    border-color: lightgray;
+    border-style: groove;
+    display: block;
+    float: left;
+    margin-left: 7px;
+}

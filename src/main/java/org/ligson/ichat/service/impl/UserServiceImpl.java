@@ -1,4 +1,4 @@
-package org.ligson.ichat.service;
+package org.ligson.ichat.service.impl;
 
 
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +7,8 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.ligson.ichat.dao.UserDao;
 import org.ligson.ichat.domain.User;
+import org.ligson.ichat.service.CaptchaService;
+import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.RegisterDTO;
 import org.ligson.ichat.vo.WebResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,11 +103,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public WebResult registerUser(RegisterDTO req) {
         WebResult webResult = WebResult.newInstance();
-        if (StringUtils.isNotBlank(req.getUsername()) && StringUtils.isNotBlank(req.getPassword()) && StringUtils.isNotBlank(req.getRegisterCode())) {
-            if (!registerCode.equals(req.getRegisterCode())) {
-                webResult.setErrorMsg("注册码错误!");
-                return webResult;
-            }
+        if (StringUtils.isNotBlank(req.getUsername()) && StringUtils.isNotBlank(req.getPassword())) {
 
             Matcher usernameMatcher = USERNAME_PATTERN.matcher(req.getUsername());
             if (!usernameMatcher.matches()) {

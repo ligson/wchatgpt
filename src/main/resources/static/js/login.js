@@ -33,9 +33,7 @@ function checkToken() {
 
 $(document).ready(function () {
     checkToken();
-
     getCustomInfo();
-
     $("#loginButton").click(function () {
         console.log("111");
         let username = $("input[name='username']").val();
@@ -44,8 +42,15 @@ $(document).ready(function () {
             alert("请输入用户名或者密码")
             return
         }
+        let captcha_code = $("input[name='captcha_code']").val();
+        if (!captcha_code) {
+            alert("请输入验证码!")
+            return
+        }
+
+        let captcha_key = $("input[name='captcha_key']").val();
         localStorage.removeItem("token");
-        doPost("/wchatgpt-be/api/auth/login", { username: username, password: password }, function (data) {
+        doPost("/wchatgpt-be/api/auth/login", { username: username, password: password, captcha_code: captcha_code, captcha_key: captcha_key }, function (data) {
             if (data.success) {
                 localStorage.setItem("userInfo", data.data.username);
                 localStorage.setItem("token", data.data.token);
