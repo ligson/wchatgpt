@@ -3,6 +3,9 @@ function getCustomInfo() {
         if (data.success) {
             $("#wx_id").html(data.data.wxId);
             $("#wx_qrcode").attr("src", data.data.wxQrCode);
+            if(data.data.wxId === 'abroket'){
+                $("#wx_logo").attr("src", "img/abroket-logo.png");
+            }
             if (data.data.wxId !== 'abroket') {
                 $(".user_register").html("登录");
             }
