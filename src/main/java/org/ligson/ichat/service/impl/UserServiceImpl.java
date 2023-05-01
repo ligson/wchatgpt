@@ -205,7 +205,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public WebResult logout(String token) {
-        onlineUserMap.remove(token);
+        if(StringUtils.isNotBlank(token)){
+            onlineUserMap.remove(token);
+        }
         return WebResult.newSuccessInstance();
     }
 }

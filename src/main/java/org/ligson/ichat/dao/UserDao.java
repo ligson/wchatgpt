@@ -94,7 +94,7 @@ public class UserDao {
             String username = users[0];
             String password = users[1];
             String level = users[2];
-            String times = users[4];
+            String times = users[4].trim();
             Date registerDate;
             try {
                 registerDate = DateUtils.parseDate(users[3], "yyyyMMddHHmmss");
