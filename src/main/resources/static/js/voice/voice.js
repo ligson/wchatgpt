@@ -130,7 +130,7 @@ function recUpload(){
 
 	//本例子假设使用原始XMLHttpRequest请求方式，实际使用中自行调整为自己的请求方式
 	//录音结束时拿到了blob文件对象，可以用FileReader读取出内容，或者用FormData上传
-	var api="http://127.0.0.1:8080/wchatgpt-be/api/auth/uploadFile";
+	var api="/wchatgpt-be/api/auth/uploadFile";
 	var onreadystatechange=function(title){
 		return function(){
 			if(xhr.readyState==4){
