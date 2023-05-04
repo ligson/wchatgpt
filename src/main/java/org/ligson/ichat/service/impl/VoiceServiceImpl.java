@@ -18,12 +18,17 @@ public class VoiceServiceImpl implements VoiceService {
             TokenVO tokenVO = TextUploadPar.uploadpar(filename);
             UploadVocTest.uploadFile(audioPath, tokenVO.getTasktag(), tokenVO.getTasktoken(), Integer.parseInt(tokenVO.getTimestamp()));
             TaskStateVo taskstate = TextTaskState.taskstate(tokenVO.getTasktag());
-            while (taskstate.getCode() != 10000) {
+            int times = 20;
+            while (taskstate.getCode() != 10000 || times > 0) {
                 if (taskstate.getCode() == 18000) {
                     return taskstate.getMessage();
                 }
                 Thread.sleep(1000);
                 taskstate = TextTaskState.taskstate(tokenVO.getTasktag());
+                times--;
+            }
+            if (times == 0) {
+                return null;
             }
             TaskDownVo taskdown = TextTaskDown.taskdown(tokenVO.getTasktag());
             return TextDownload.download(taskdown.getDownurl());
