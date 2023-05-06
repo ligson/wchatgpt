@@ -124,7 +124,7 @@ public class UserServiceImpl implements UserService {
             user.setName(req.getUsername());
             user.setPassword(req.getPassword());
             user.setLevel(1);
-            user.setTimes(20);
+            user.setTimes(5);
             userDao.insert(user);
             webResult.setSuccess(true);
             return webResult;
