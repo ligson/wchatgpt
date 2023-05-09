@@ -29,3 +29,5 @@ spring:
   web:
     resources:
       static-locations: classpath:/static/,classpath:/resources/,file:${app.openai.img-dir}
+  mvc:
+    dispatch-options-request: true

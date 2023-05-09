@@ -79,15 +79,11 @@ public class OpenAIChatServiceImpl implements ChatService {
             return null;
         }
         Message message = messages.get(messages.size() - 1);
-        if (message.getContent().contains("图片")) {
-            return chatImg(completionsReq, message.getContent());
-        } else {
-            return chatTxt(completionsReq);
-        }
+        return chatTxt(completionsReq);
     }
 
-    private String chatImg(ChatCompletionsReq completionsReq, String msg) {
-        String imageUrl = imageService.imageGenerate(msg);
+    public String img(String contextId, String question) {
+        String imageUrl = imageService.imageGenerate(question);
         StringBuilder builder = new StringBuilder();
         if (imageUrl != null) {
             List<String> urls = Collections.singletonList(imageUrl);

@@ -8,6 +8,7 @@ import org.ligson.ichat.serializer.CruxSerializer;
 import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.WebResult;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -23,9 +24,9 @@ public class AuthInterceptor implements HandlerInterceptor {
     private static final String[] ignore_urls = new String[]{"/wchatgpt-be/api/sys/.*",
             "/wchatgpt-be/api/auth/.*",
             "/wchatgpt-be/user-images/.*",
-            "/wchatgpt-be/api/user/upgrade.*",
-            "/wchatgpt-be/api/user/delete.*",
-            "/wchatgpt-be/api/user/resetPassword.*",
+            //"/wchatgpt-be/api/user/upgrade.*",
+            //"/wchatgpt-be/api/user/delete.*",
+            //"/wchatgpt-be/api/user/resetPassword.*",
             //static file
             ".*(html)$", ".*(js)$", ".*(css)$", "/wchatgpt-be/css/.*", "/wchatgpt-be/img/.*", "/wchatgpt-be/js/.*", "/wchatgpt-be/js/voice/.*"};
     private final UserService userService;
@@ -44,6 +45,9 @@ public class AuthInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request,
                              HttpServletResponse response,
                              Object handler) throws Exception {
+        if (HttpMethod.OPTIONS.name().equals(request.getMethod())) {
+            return true;
+        }
         String url = request.getRequestURI();
         for (String ignoreUrl : ignore_urls) {
             if (url.matches(ignoreUrl)) {
@@ -57,6 +61,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             WebResult webResult = WebResult.newErrorInstance("用户已经过期，请重新登录");
             response.setHeader(HttpHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+            response.setStatus(401);
             response.getWriter().println(serializer.serialize(webResult));
             return false;
         }
