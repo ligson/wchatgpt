@@ -161,7 +161,7 @@ public class UserDao {
             StringBuilder stringBuilder = new StringBuilder();
             while ((line = reader.readLine()) != null) {
                 String[] array = line.split(",");
-                if (array.length == 4) {
+                if (array.length == 5) {
                     if (!username.equals(array[0])) {
                         stringBuilder.append(line).append("\n");
                     }
