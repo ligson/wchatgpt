@@ -18,7 +18,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedOrigins("/**")
-                .allowedOriginPatterns("http://localhost:5173", "http://127.0.0.1:8080")
+                .allowedOriginPatterns("https://wchat.upgrop.com","https://ichat.x-assn.xyz","http://localhost:5173", "http://127.0.0.1:8080")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("token")
                 .maxAge(3600)

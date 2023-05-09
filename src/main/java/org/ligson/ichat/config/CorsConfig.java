@@ -15,7 +15,7 @@ import java.util.List;
 public class CorsConfig {
     private CorsConfiguration buildConfig() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOriginPatterns(List.of("http://localhost:5173", "http://127.0.0.1:8080")); // 1
+        corsConfiguration.setAllowedOriginPatterns(List.of("https://wchat.upgrop.com","https://ichat.x-assn.xyz","http://localhost:5173", "http://127.0.0.1:8080")); // 1
         corsConfiguration.addAllowedHeader("*"); // 2
         corsConfiguration.addAllowedMethod("*"); // 3
         corsConfiguration.setAllowCredentials(true);
