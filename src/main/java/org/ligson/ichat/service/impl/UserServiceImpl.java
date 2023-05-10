@@ -46,20 +46,21 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.isBlank(token)) {
             return null;
         }
-        return onlineUserRedisTemplate.boundValueOps(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token).get();
+        User user = onlineUserRedisTemplate.boundValueOps(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token).get();
+        return user;
     }
 
     public WebResult login(String username, String password) {
         WebResult webResult = new WebResult();
         User vo = userDao.findByName(username);
         if (vo != null) {
-            Map<Object, Object> userTokensMap = onlineUserRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).entries();
-            int count = userTokensMap == null ? 0 : userTokensMap.values().size();
-            if (count > 3) {
-                webResult.setSuccess(false);
-                webResult.setErrorMsg("最多可以使用两个设备登录，可以退出之前登录后再试");
-                return webResult;
-            }
+//            Map<Object, Object> userTokensMap = onlineUserRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).entries();
+//            int count = userTokensMap == null ? 0 : userTokensMap.values().size();
+//            if (count > 3) {
+//                webResult.setSuccess(false);
+//                webResult.setErrorMsg("最多可以使用两个设备登录，可以退出之前登录后再试");
+//                return webResult;
+//            }
 
             if (vo.getPassword().equals(password)) {
                 if (vo.getTimes() <= 0) {
@@ -78,7 +79,7 @@ public class UserServiceImpl implements UserService {
                 webResult.setSuccess(true);
                 webResult.putData("username", username);
                 webResult.putData("token", token);
-                onlineUserRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).put(token, new Date());
+//                onlineUserRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).put(token, new Date());
                 onlineUserRedisTemplate.boundValueOps(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token).set(vo);
             } else {
                 webResult.setSuccess(false);
