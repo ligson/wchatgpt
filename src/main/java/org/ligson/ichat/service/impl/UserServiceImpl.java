@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.isBlank(token)) {
             return null;
         }
-        return onlineUserRedisTemplate.boundValueOps(token).get();
+        return onlineUserRedisTemplate.boundValueOps(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token).get();
     }
 
     public WebResult login(String username, String password) {
