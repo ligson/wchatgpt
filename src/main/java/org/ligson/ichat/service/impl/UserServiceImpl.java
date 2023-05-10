@@ -4,6 +4,7 @@ package org.ligson.ichat.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.ligson.ichat.dao.UserDao;
 import org.ligson.ichat.domain.User;
 import org.ligson.ichat.serializer.CruxSerializer;
@@ -84,7 +85,7 @@ public class UserServiceImpl implements UserService {
                 webResult.setSuccess(true);
                 webResult.putData("username", username);
                 webResult.putData("token", token);
-                onlineUserRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).put(token, new Date());
+                onlineUserRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).put(token, DateFormatUtils.format(new Date(),"yyyyMMddHHmmss"));
                 onlineUserRedisTemplate.boundValueOps(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token).set(cruxSerializer.serialize(vo));
             } else {
                 webResult.setSuccess(false);
