@@ -3,27 +3,20 @@ app:
     url: xxx
     username: xxx
     password: xxx
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: password
   customer:
     wx:
       id: xxx
       qr_code: xx
   server:
-    port: 服务器端口
     domain-url: http://127.0.0.1:8080/wchatgpt-be
-    registerCode: "admin"
-    userFile: "/Users/jinmancang1/work/repository/wchatgpt/users.txt"
-  wx:
-    token: 微信token
-    appId: xx
-    appSecret: xxx
-    msgPath: /app/wchatgpt/msg
-  turing:
-    userId: xxx
-    apiKey: xxx
-    keyword: xxx
+    register-code: "admin"
+    user-file: "/Users/jinmancang1/work/repository/wchatgpt/users.txt"
   openai:
-    skToken: xxx
-    keyword: xxx
+    sk-token: xxx
     img-dir: /tmp/
 server:
   port: 8080
@@ -46,3 +39,7 @@ spring:
     url: ${app.db.url}
     username: ${app.db.username}
     password: ${app.db.password}
+  redis:
+    host: ${app.redis.host}
+    port: ${app.redis.port}
+    password: ${app.redis.password}

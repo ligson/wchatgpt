@@ -12,12 +12,12 @@ import org.ligson.ichat.vo.WebResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,8 +25,6 @@ import java.util.regex.Pattern;
 @Lazy(value = false)
 @Slf4j
 public class UserServiceImpl implements UserService {
-    @Value("${app.server.user-file}")
-    private String userFile;
 
     @Autowired
     private UserDao userDao;
@@ -34,31 +32,29 @@ public class UserServiceImpl implements UserService {
     private static final Pattern PASSWORD_PATTERN = Pattern.compile("^[a-z0-9_]{8,}$");
 
 
-    @Value("${app.server.registerCode}")
+    @Value("${app.server.register-code}")
     private String registerCode;
 
-
+    private final static String USER_SESSION_CONTEXT_PREFIX = "xchat:session-context:";
     //已经登录用户
-    private final Map<String, User> onlineUserMap = new ConcurrentHashMap<>();
+
+    @Autowired
+    private RedisTemplate<String, User> onlineUserRedisTemplate;
 
 
     public User getLoginUserByToken(String token) {
         if (StringUtils.isBlank(token)) {
             return null;
         }
-        return onlineUserMap.get(token);
+        return onlineUserRedisTemplate.boundValueOps(token).get();
     }
 
     public WebResult login(String username, String password) {
         WebResult webResult = new WebResult();
         User vo = userDao.findByName(username);
         if (vo != null) {
-            int count = 0;
-            for (User value : onlineUserMap.values()) {
-                if (value.getName().equals(vo.getName())) {
-                    count++;
-                }
-            }
+            Map<Object, Object> userTokensMap = onlineUserRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).entries();
+            int count = userTokensMap == null ? 0 : userTokensMap.values().size();
             if (count > 3) {
                 webResult.setSuccess(false);
                 webResult.setErrorMsg("最多可以使用两个设备登录，可以退出之前登录后再试");
@@ -82,7 +78,8 @@ public class UserServiceImpl implements UserService {
                 webResult.setSuccess(true);
                 webResult.putData("username", username);
                 webResult.putData("token", token);
-                onlineUserMap.put(token, vo);
+                onlineUserRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).put(token, new Date());
+                onlineUserRedisTemplate.boundValueOps(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token).set(vo);
             } else {
                 webResult.setSuccess(false);
                 webResult.setErrorMsg("密码错误");
@@ -209,7 +206,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public WebResult logout(String token) {
         if (StringUtils.isNotBlank(token)) {
-            onlineUserMap.remove(token);
+            User user = getLoginUserByToken(token);
+            if (user != null) {
+                onlineUserRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + user.getId()).delete(token);
+                onlineUserRedisTemplate.delete(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token);
+            }
         }
         return WebResult.newSuccessInstance();
     }
