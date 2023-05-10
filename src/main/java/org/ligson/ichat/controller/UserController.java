@@ -6,10 +6,7 @@ import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.ResetPwdDTO;
 import org.ligson.ichat.vo.UpgradeDTO;
 import org.ligson.ichat.vo.WebResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/user")
@@ -44,5 +41,15 @@ public class UserController {
         WebResult webResult = WebResult.newSuccessInstance();
         webResult.putData("user", user);
         return webResult;
+    }
+
+    @GetMapping("/fix")
+    public WebResult fix(@RequestParam String registerCode) {
+        if ("upgrop@1949".equals(registerCode)) {
+            userService.fix();
+            return WebResult.newSuccessInstance();
+        } else {
+            return WebResult.newErrorInstance("error");
+        }
     }
 }

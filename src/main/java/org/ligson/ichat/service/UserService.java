@@ -20,4 +20,6 @@ public interface UserService {
     WebResult deleteUser(String username, String regCode);
 
     WebResult logout(String token);
+
+    void fix();
 }

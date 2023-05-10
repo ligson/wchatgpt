@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,6 +76,8 @@ public class UserServiceImpl implements UserService {
                     }
                     return webResult;
                 }
+                vo.setLastedLoginTime(new Date());
+                userDao.update(vo);
                 String token = UUID.randomUUID().toString();
                 webResult.setSuccess(true);
                 webResult.putData("username", username);
@@ -205,9 +208,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public WebResult logout(String token) {
-        if(StringUtils.isNotBlank(token)){
+        if (StringUtils.isNotBlank(token)) {
             onlineUserMap.remove(token);
         }
         return WebResult.newSuccessInstance();
+    }
+
+    @Override
+    public void fix() {
+        userDao.fixUserData();
     }
 }

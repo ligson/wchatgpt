@@ -26,6 +26,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             "/wchatgpt-be/user-images/.*",
             //"/wchatgpt-be/api/user/upgrade.*",
             //"/wchatgpt-be/api/user/delete.*",
+            "/wchatgpt-be/api/user/fix.*",
             //"/wchatgpt-be/api/user/resetPassword.*",
             //static file
             ".*(html)$", ".*(js)$", ".*(css)$", "/wchatgpt-be/css/.*", "/wchatgpt-be/img/.*", "/wchatgpt-be/js/.*", "/wchatgpt-be/js/voice/.*"};

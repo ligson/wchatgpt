@@ -1,4 +1,8 @@
 app:
+  db:
+    url: xxx
+    username: xxx
+    password: xxx
   customer:
     wx:
       id: xxx
@@ -31,3 +35,14 @@ spring:
       static-locations: classpath:/static/,classpath:/resources/,file:${app.openai.img-dir}
   mvc:
     dispatch-options-request: true
+  datasource:
+    hikari:
+      jdbc-url: ${app.db.url}
+      username: ${app.db.username}
+      password: ${app.db.password}
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      connection-test-query: select 1
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${app.db.url}
+    username: ${app.db.username}
+    password: ${app.db.password}
