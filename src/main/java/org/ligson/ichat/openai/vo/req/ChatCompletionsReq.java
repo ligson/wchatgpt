@@ -12,7 +12,7 @@ public class ChatCompletionsReq {
 //    private String model = "gpt-4";
     @JsonProperty("max_tokens")
     private int maxTokens = 2000;
-    private String prompt;
+    //private String prompt;
     @JsonProperty("top_p")
     private int topP = 1;
     //控制结果随机性，0.0表示结果固定，随机性大可以设置为0.9
