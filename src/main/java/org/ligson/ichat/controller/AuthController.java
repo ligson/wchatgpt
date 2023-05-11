@@ -2,6 +2,7 @@ package org.ligson.ichat.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ligson.ichat.domain.User;
+import org.ligson.ichat.ex.InnerException;
 import org.ligson.ichat.service.CaptchaService;
 import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.*;
@@ -38,6 +39,10 @@ public class AuthController {
     @PostMapping("/checkLogin")
     public WebResult checkLogin(@RequestBody TokenDTO tokenDTO) {
         WebResult webResult = WebResult.newInstance();
+        if(tokenDTO.getToken()==null){
+            throw new InnerException("ss");
+        }
+
         User userInfo = userService.getLoginUserByToken(tokenDTO.getToken());
         if (userInfo != null) {
             webResult.setSuccess(true);

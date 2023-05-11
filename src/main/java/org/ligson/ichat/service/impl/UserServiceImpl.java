@@ -7,6 +7,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.ligson.ichat.dao.UserDao;
 import org.ligson.ichat.domain.User;
+import org.ligson.ichat.enums.UserLevel;
 import org.ligson.ichat.serializer.CruxSerializer;
 import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.RegisterDTO;
@@ -41,7 +42,7 @@ public class UserServiceImpl implements UserService {
     //已经登录用户
 
     @Autowired
-    private StringRedisTemplate onlineUserRedisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private CruxSerializer cruxSerializer;
 
@@ -49,7 +50,7 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.isBlank(token)) {
             return null;
         }
-        String userJson = onlineUserRedisTemplate.boundValueOps(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token).get();
+        String userJson = stringRedisTemplate.boundValueOps(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token).get();
         if (StringUtils.isNotBlank(userJson)) {
             return cruxSerializer.deserialize(userJson, User.class);
         }
@@ -60,7 +61,7 @@ public class UserServiceImpl implements UserService {
         WebResult webResult = new WebResult();
         User vo = userDao.findByName(username);
         if (vo != null) {
-            Map<Object, Object> userTokensMap = onlineUserRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).entries();
+            Map<Object, Object> userTokensMap = stringRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).entries();
             int count = userTokensMap == null ? 0 : userTokensMap.values().size();
             if (count > 30) {
                 webResult.setSuccess(false);
@@ -70,7 +71,7 @@ public class UserServiceImpl implements UserService {
 
             if (vo.getPassword().equals(password)) {
                 if (vo.getTimes() <= 0) {
-                    if (vo.getLevel() == 1) {
+                    if (vo.getLevel() == UserLevel.FREE) {
                         webResult.setSuccess(false);
                         webResult.setErrorMsg("成本有限,免费用户只能体验20次，请联系管理员付费,请谅解");
                     } else {
@@ -85,8 +86,8 @@ public class UserServiceImpl implements UserService {
                 webResult.setSuccess(true);
                 webResult.putData("username", username);
                 webResult.putData("token", token);
-                onlineUserRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).put(token, DateFormatUtils.format(new Date(),"yyyyMMddHHmmss"));
-                onlineUserRedisTemplate.boundValueOps(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token).set(cruxSerializer.serialize(vo));
+                stringRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).put(token, DateFormatUtils.format(new Date(), "yyyyMMddHHmmss"));
+                stringRedisTemplate.boundValueOps(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token).set(cruxSerializer.serialize(vo));
             } else {
                 webResult.setSuccess(false);
                 webResult.setErrorMsg("密码错误");
@@ -130,7 +131,7 @@ public class UserServiceImpl implements UserService {
             user.setId(UUID.randomUUID().toString());
             user.setName(req.getUsername());
             user.setPassword(req.getPassword());
-            user.setLevel(1);
+            user.setLevel(UserLevel.FREE);
             user.setTimes(5);
             userDao.insert(user);
             webResult.setSuccess(true);
@@ -182,7 +183,7 @@ public class UserServiceImpl implements UserService {
                 webResult.setErrorMsg("用户名不存在");
                 return webResult;
             }
-            vo.setLevel(2);
+            vo.setLevel(UserLevel.FOREVER);
             vo.setTimes(5000);
             userDao.update(vo);
             webResult.setSuccess(true);
@@ -215,8 +216,8 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.isNotBlank(token)) {
             User user = getLoginUserByToken(token);
             if (user != null) {
-                onlineUserRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + user.getId()).delete(token);
-                onlineUserRedisTemplate.delete(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token);
+                stringRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + user.getId()).delete(token);
+                stringRedisTemplate.delete(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token);
             }
         }
         return WebResult.newSuccessInstance();

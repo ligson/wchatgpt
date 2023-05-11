@@ -1,24 +1,18 @@
 package org.ligson.ichat.serializer.jackson;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.ligson.ichat.serializer.CruxSerializer;
-import org.springframework.stereotype.Service;
 
-@Service
 @Slf4j
 public class JacksonSerializer implements CruxSerializer {
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    public JacksonSerializer() {
-        objectMapper = new ObjectMapper();
-        objectMapper.disable(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES)
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+    public JacksonSerializer(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
+
 
     @Override
     public <T> String serialize(T t) {

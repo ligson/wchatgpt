@@ -15,7 +15,6 @@ import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.util.Timeout;
 import org.ligson.ichat.serializer.CruxSerializer;
-import org.ligson.ichat.serializer.jackson.JacksonSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,11 +29,11 @@ public class MyHttpClient {
     private final CloseableHttpClient httpClient;
     private final CruxSerializer serializer;
 
-    public MyHttpClient() {
-        this(Timeout.of(200, TimeUnit.SECONDS), Timeout.of(300, TimeUnit.SECONDS));
+    public MyHttpClient(CruxSerializer cruxSerializer) {
+        this(cruxSerializer, Timeout.of(200, TimeUnit.SECONDS), Timeout.of(300, TimeUnit.SECONDS));
     }
 
-    public MyHttpClient(Timeout connectTimeout, Timeout socketTimeout) {
+    public MyHttpClient(CruxSerializer cruxSerializer, Timeout connectTimeout, Timeout socketTimeout) {
         ConnectionConfig connectionConfig = ConnectionConfig.custom().setConnectTimeout(connectTimeout).setSocketTimeout(socketTimeout).build();
         PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
                 .setMaxConnTotal(200)
@@ -42,7 +41,7 @@ public class MyHttpClient {
                 .setDefaultConnectionConfig(connectionConfig)
                 .build();
         httpClient = HttpClientBuilder.create().setConnectionManager(connectionManager).build();
-        serializer = new JacksonSerializer();
+        this.serializer = cruxSerializer;
     }
 
     private String doRequest(HttpUriRequestBase requestBase, List<Header> headers) throws Exception {
