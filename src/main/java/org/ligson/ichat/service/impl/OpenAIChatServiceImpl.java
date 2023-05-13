@@ -13,6 +13,7 @@ import org.ligson.ichat.openai.vo.res.*;
 import org.ligson.ichat.serializer.CruxSerializer;
 import org.ligson.ichat.service.ChatService;
 import org.ligson.ichat.util.MyHttpClient;
+import org.ligson.ichat.vo.WebResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -159,5 +160,12 @@ public class OpenAIChatServiceImpl implements ChatService {
             return Collections.EMPTY_LIST;
         }
         return res.getData().stream().map(ImgGenData::getUrl).collect(Collectors.toList());
+    }
+
+    public WebResult audio2txt(File file) {
+        String msg = openAiClient.audioTranscriptions(file);
+        WebResult webResult = WebResult.newSuccessInstance();
+        webResult.putData("text", msg);
+        return webResult;
     }
 }

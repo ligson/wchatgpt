@@ -12,6 +12,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.util.Timeout;
 import org.ligson.ichat.serializer.CruxSerializer;
@@ -52,9 +53,13 @@ public class MyHttpClient {
     }
 
     public String doPost(String url, List<Header> headers, String body) throws Exception {
+        return doPost(url, headers, new StringEntity(body, StandardCharsets.UTF_8));
+    }
+
+    public String doPost(String url, List<Header> headers, HttpEntity httpEntity) throws Exception {
         HttpPost httpPost = new HttpPost(url);
-        log.debug("POST地址:{},请求body:{}", url, body);
-        httpPost.setEntity(new StringEntity(body, StandardCharsets.UTF_8));
+        log.debug("POST地址:{},请求body类型:{}", url, httpEntity.getClass().getSimpleName());
+        httpPost.setEntity(httpEntity);
         return doRequest(httpPost, headers);
     }
 
@@ -62,6 +67,7 @@ public class MyHttpClient {
         String result = doPost(url, headers, body);
         return deserialize(result, returnType);
     }
+
 
     public <T, E> T doPost(String url, List<Header> headers, E reqBody, Class<T> returnType) throws Exception {
         String result = doPost(url, headers, serializer.serialize(reqBody));

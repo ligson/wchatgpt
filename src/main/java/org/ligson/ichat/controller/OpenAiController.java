@@ -1,6 +1,7 @@
 package org.ligson.ichat.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ligson.ichat.domain.User;
 import org.ligson.ichat.openai.vo.req.ChatCompletionsReq;
@@ -10,11 +11,14 @@ import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.WebResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
@@ -118,5 +122,29 @@ public class OpenAiController {
     @GetMapping("/models")
     public WebResult models() {
         return WebResult.newSuccessInstance().putData("models", openAIChatService.models());
+    }
+
+    @PostMapping("/audio2txt")
+    public WebResult audio2Txt(@RequestPart("file") MultipartFile multipartFile) throws IOException {
+        String orginFileName = multipartFile.getOriginalFilename();
+        String prefix = FilenameUtils.getPrefix(orginFileName);
+        String ext = FilenameUtils.getExtension(orginFileName);
+        if("blob".equals(orginFileName)){
+            prefix = UUID.randomUUID().toString();
+        }
+        if (StringUtils.isBlank(prefix)) {
+            return WebResult.newErrorInstance("参数错误");
+        }
+        if (StringUtils.isBlank(ext) && multipartFile.getContentType() != null) {
+            if ("audio/wav".equals(multipartFile.getContentType())) {
+                ext = ".wav";
+            }
+        }
+        if (StringUtils.isBlank(ext)) {
+            return WebResult.newErrorInstance("格式不支持");
+        }
+        File file = File.createTempFile(prefix, ext);
+        multipartFile.transferTo(file);
+        return openAIChatService.audio2txt(file);
     }
 }
