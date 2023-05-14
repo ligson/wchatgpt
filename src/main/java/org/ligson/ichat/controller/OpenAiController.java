@@ -129,20 +129,22 @@ public class OpenAiController {
         String orginFileName = multipartFile.getOriginalFilename();
         String prefix = FilenameUtils.getPrefix(orginFileName);
         String ext = FilenameUtils.getExtension(orginFileName);
-        if("blob".equals(orginFileName)){
-            prefix = UUID.randomUUID().toString();
-        }
-        if (StringUtils.isBlank(prefix)) {
-            return WebResult.newErrorInstance("参数错误");
-        }
-        if (StringUtils.isBlank(ext) && multipartFile.getContentType() != null) {
-            if ("audio/wav".equals(multipartFile.getContentType())) {
-                ext = ".wav";
-            }
-        }
-        if (StringUtils.isBlank(ext)) {
-            return WebResult.newErrorInstance("格式不支持");
-        }
+//        if("blob".equals(orginFileName)){
+//            prefix = UUID.randomUUID().toString();
+//        }
+//        if (StringUtils.isBlank(prefix)) {
+//            return WebResult.newErrorInstance("参数错误");
+//        }
+//        if (StringUtils.isBlank(ext) && multipartFile.getContentType() != null) {
+//            if ("audio/wav".equals(multipartFile.getContentType())) {
+//                ext = ".wav";
+//            }
+//        }
+//        if (StringUtils.isBlank(ext)) {
+//            return WebResult.newErrorInstance("格式不支持");
+//        }
+        prefix = UUID.randomUUID().toString();
+        ext = ".wav";
         File file = File.createTempFile(prefix, ext);
         multipartFile.transferTo(file);
         return openAIChatService.audio2txt(file);
