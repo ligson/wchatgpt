@@ -88,30 +88,35 @@ public class MyHttpClient {
         return serializer.deserialize(result, returnType);
     }
 
-    public File download(String url, String fileName, String destDir) throws IOException {
-        HttpGet get = new HttpGet(url);
-        MyFileHttpClientResponseHandler myHttpClientResponseHandler = new MyFileHttpClientResponseHandler();
-        File file = httpClient.execute(get, myHttpClientResponseHandler);
-        if (file == null) {
-            log.error("下载url:{}到:{}失败", url, destDir + "/" + fileName);
-            return null;
-        } else {
-            String ext = FilenameUtils.getExtension(file.getName());
-            FileInputStream fis = new FileInputStream(file);
-            File destDirFile = new File(destDir);
-            if (!destDirFile.exists()) {
-                destDirFile.mkdirs();
+    public File download(String url, String fileName, String destDir) {
+        try {
+            HttpGet get = new HttpGet(url);
+            MyFileHttpClientResponseHandler myHttpClientResponseHandler = new MyFileHttpClientResponseHandler();
+            File file = httpClient.execute(get, myHttpClientResponseHandler);
+            if (file == null) {
+                log.error("下载url:{}到:{}失败", url, destDir + "/" + fileName);
+                return null;
+            } else {
+                String ext = FilenameUtils.getExtension(file.getName());
+                FileInputStream fis = new FileInputStream(file);
+                File destDirFile = new File(destDir);
+                if (!destDirFile.exists()) {
+                    destDirFile.mkdirs();
+                }
+                File destFile = new File(destDir, fileName + "." + ext);
+                if (!destFile.exists()) {
+                    destFile.createNewFile();
+                }
+                FileOutputStream fos = new FileOutputStream(destFile);
+                IOUtils.copy(fis, fos);
+                fis.close();
+                fos.close();
+                return destFile;
             }
-            File destFile = new File(destDir, fileName + "." + ext);
-            if (!destFile.exists()) {
-                destFile.createNewFile();
-            }
-            FileOutputStream fos = new FileOutputStream(destFile);
-            IOUtils.copy(fis, fos);
-            fis.close();
-            fos.close();
-            return destFile;
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
+        return null;
     }
 
 }

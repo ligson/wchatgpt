@@ -84,8 +84,6 @@ public class OpenAiClient {
                 .setMode(HttpMultipartMode.LEGACY)
                 .addTextBody("model", "whisper-1")
                 .addBinaryBody("file", file)
-//                .addTextBody("response_format", "text")
-//                .setContentType(ContentType.MULTIPART_FORM_DATA)
                 .build();
         try {
             String json = myHttpClient.doPost(BASE_URL + "/v1/audio/transcriptions", List.of(authHeader), httpEntity);

@@ -2,8 +2,6 @@ package org.ligson.ichat.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.ligson.ichat.context.SessionContext;
-import org.ligson.ichat.domain.WindowSize;
 import org.ligson.ichat.images.GenerateImageService;
 import org.ligson.ichat.openai.OpenAiClient;
 import org.ligson.ichat.openai.vo.Model;
@@ -13,6 +11,7 @@ import org.ligson.ichat.openai.vo.res.*;
 import org.ligson.ichat.serializer.CruxSerializer;
 import org.ligson.ichat.service.ChatService;
 import org.ligson.ichat.util.MyHttpClient;
+import org.ligson.ichat.util.WindowSizeUtil;
 import org.ligson.ichat.vo.WebResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -43,7 +43,7 @@ public class OpenAIChatServiceImpl implements ChatService {
     @Autowired
     private GenerateImageService imageService;
     @Autowired
-    private SessionContext sessionContext;
+    private WindowSizeUtil windowSizeUtil;
 
     public OpenAIChatServiceImpl() {
         log.debug("---");
@@ -79,52 +79,28 @@ public class OpenAIChatServiceImpl implements ChatService {
         if (messages.isEmpty()) {
             return null;
         }
-        Message message = messages.get(messages.size() - 1);
         return chatTxt(completionsReq);
     }
 
     public String img(String contextId, String question) {
-        String imageUrl = imageService.imageGenerate(question);
+        String imgUrl = generateImgReturnUrl(question);
         StringBuilder builder = new StringBuilder();
-        if (imageUrl != null) {
-            List<String> urls = Collections.singletonList(imageUrl);
-            for (String url : urls) {
-                File file;
-                try {
-                    file = myHttpClient.download(url, UUID.randomUUID().toString(), imgDir + "user-images");
-                } catch (IOException e) {
-                    log.error(e.getMessage(), e);
-                    continue;
-                }
-                if (file.length() == 0) {
-                    builder.append("图片生成失败，请重新生成<br/>");
-                } else {
-                    String imgUrl = domainUrl + "/user-images/" + file.getName();
-                    builder.append("<img src='").append(imgUrl).append("' ").append(getStyle()).append("/>").append("<br/>");
-                }
-            }
+        if (imgUrl != null) {
+            builder.append("<img src='").append(imgUrl).append("' ").append(windowSizeUtil.getStyle()).append("/>").append("<br/>");
         }
         return builder.toString();
     }
 
-    private String getStyle() {
-        String fmt = "style=\"width: %dpx; height: %dpx;\"";
-        WindowSize windowSize = sessionContext.getWindowSize();
-        int winWidth = windowSize.getWidth();
-        int winHeight = windowSize.getHeight();
-        int imageWidth = 960;
-        int imageHeight = 1568;
-        int num = 10;
-        for (int i = 10; i > 1; i--) {
-            if ((imageWidth * (i * 0.1f)) < winWidth && (imageHeight * (i * 0.1f)) < winHeight) {
-                num = i;
-                break;
-            }
-        }
-        float w = imageWidth * (num * 0.1f);
-        float h = imageHeight * (num * 0.1f);
-        return String.format(fmt, Math.round(w), Math.round(h));
+    public String generateImgReturnUrl(String question) {
+        String image = imageService.imageGenerate(question);
+        return image != null ? getWebImageUrl(image) : null;
     }
+
+    private String getWebImageUrl(String imageUrl) {
+        File file = myHttpClient.download(imageUrl, UUID.randomUUID().toString(), imgDir + "user-images");
+        return file != null ? domainUrl + "/user-images/" + file.getName() : null;
+    }
+
 
     @Override
     public String chat(String contextId, String question) {
