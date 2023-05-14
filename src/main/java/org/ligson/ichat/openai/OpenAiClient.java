@@ -88,7 +88,7 @@ public class OpenAiClient {
 //                .setContentType(ContentType.MULTIPART_FORM_DATA)
                 .build();
         try {
-            String json = myHttpClient.doPost(BASE_URL + "/v1/audio/transcriptions", List.of(authHeader, formDataHeader), httpEntity);
+            String json = myHttpClient.doPost(BASE_URL + "/v1/audio/transcriptions", List.of(authHeader), httpEntity);
             AudioTranscriptionsRes res = serializer.deserialize(json, AudioTranscriptionsRes.class);
             return res.getText();
         } catch (Exception e) {
