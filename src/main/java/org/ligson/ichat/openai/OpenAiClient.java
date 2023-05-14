@@ -22,6 +22,8 @@ import org.ligson.ichat.openai.vo.res.ImgGenRes;
 import org.ligson.ichat.util.MyHttpClient;
 
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
@@ -81,9 +83,9 @@ public class OpenAiClient {
         HttpEntity httpEntity = MultipartEntityBuilder.create()
                 .setMode(HttpMultipartMode.LEGACY)
                 .addPart("file", new FileBody(file, ContentType.create("audio/wav")))
-                .addTextBody("model", "whisper-1")
-                .addTextBody("response_format", "text")
-                .setContentType(ContentType.MULTIPART_FORM_DATA)
+                .addTextBody("model", "whisper-1",ContentType.create("text/plain", StandardCharsets.UTF_8))
+//                .addTextBody("response_format", "text")
+//                .setContentType(ContentType.MULTIPART_FORM_DATA)
                 .build();
         try {
             String json = myHttpClient.doPost(BASE_URL + "/v1/audio/transcriptions", List.of(authHeader, formDataHeader), httpEntity);
