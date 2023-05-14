@@ -11,7 +11,7 @@ public class MidjourneyClient {
 
     public static void main(String[] args) throws IOException {
 
-        MyHttpClient myHttpClient = new MyHttpClient();
+        MyHttpClient myHttpClient = new MyHttpClient(null);
 
         File file = myHttpClient.download(MIDJOURNEY_URL, "test", "/Users/lijinsheng/workspace/coderwk/myideawk/wchatgpt/user-data/user-images");
         System.out.println(file.getAbsolutePath());

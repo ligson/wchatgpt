@@ -82,8 +82,8 @@ public class OpenAiClient {
         log.debug("audio.....:{}",file.getAbsolutePath());
         HttpEntity httpEntity = MultipartEntityBuilder.create()
                 .setMode(HttpMultipartMode.LEGACY)
-                .addPart("file", new FileBody(file, ContentType.create("audio/wav")))
-                .addTextBody("model", "whisper-1",ContentType.create("text/plain", StandardCharsets.UTF_8))
+                .addTextBody("model", "whisper-1")
+                .addBinaryBody("file", file)
 //                .addTextBody("response_format", "text")
 //                .setContentType(ContentType.MULTIPART_FORM_DATA)
                 .build();
