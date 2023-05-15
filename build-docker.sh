@@ -1,5 +1,7 @@
 #!/bin/bash
-#export JAVA_HOME=/Library/Java/JavaVirtualMachines/openjdk-17.jdk/Contents/Home
+if [ `hostname`=='ligson-mac' ] ; then
+  export JAVA_HOME=/Library/Java/JavaVirtualMachines/openjdk-17.jdk/Contents/Home
+fi
 mvn clean
 rm -rf target/*
 mvn package docker:build -Dmaven.test.skip=true
