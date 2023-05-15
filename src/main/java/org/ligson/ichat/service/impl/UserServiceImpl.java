@@ -47,7 +47,6 @@ public class UserServiceImpl implements UserService {
         User user = userDao.findByName(username);
         if (user != null) {
             int count = cacheService.getLoginUserTerminalCount(user.getId());
-            ;
             if (count > 30) {
                 webResult.setSuccess(false);
                 webResult.setErrorMsg("最多可以使用两个设备登录，可以退出之前登录后再试");
