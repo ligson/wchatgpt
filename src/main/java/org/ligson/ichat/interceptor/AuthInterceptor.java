@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ligson.ichat.context.SessionContext;
 import org.ligson.ichat.domain.User;
 import org.ligson.ichat.domain.WindowSize;
+import org.ligson.ichat.enums.UserType;
 import org.ligson.ichat.serializer.CruxSerializer;
 import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.WebResult;
@@ -65,6 +66,16 @@ public class AuthInterceptor implements HandlerInterceptor {
             response.setStatus(401);
             response.getWriter().println(serializer.serialize(webResult));
             return false;
+        }
+        if (url.matches("/wchatgpt-be/api/admin/.*")) {
+            if (user.getUserType() != UserType.ADMIN) {
+                WebResult webResult = WebResult.newErrorInstance("用户没有权限");
+                response.setHeader(HttpHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON_VALUE);
+                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                response.setStatus(403);
+                response.getWriter().println(serializer.serialize(webResult));
+                return false;
+            }
         }
         sessionContext.setCurrentUser(user);
         return true;

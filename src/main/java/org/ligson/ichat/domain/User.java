@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ligson.ichat.enums.UserLevel;
+import org.ligson.ichat.enums.UserType;
 
 import java.util.Date;
 
@@ -20,4 +21,6 @@ public class User {
     private Date createdTime;
     private Date lastedLoginTime;
     private Integer times;
+
+    private UserType userType;
 }

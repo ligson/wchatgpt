@@ -22,7 +22,7 @@ public class UserController {
     @PostMapping("/resetPassword")
     public WebResult resetPassword(@RequestBody ResetPwdDTO req) {
         User user = sessionContext.getCurrentUser();
-        return userService.resetPassword(user.getName(), req.getOldPassword(), req.getNewPassword());
+        return userService.modifyPassword(user.getName(), req.getOldPassword(), req.getNewPassword());
     }
 
     @PostMapping("/upgrade")

@@ -5,11 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.ligson.ichat.admin.vo.*;
 import org.ligson.ichat.dao.UserDao;
 import org.ligson.ichat.domain.User;
 import org.ligson.ichat.enums.UserLevel;
+import org.ligson.ichat.enums.UserType;
 import org.ligson.ichat.serializer.CruxSerializer;
 import org.ligson.ichat.service.UserService;
+import org.ligson.ichat.vo.BasePageReq;
+import org.ligson.ichat.vo.PageWebResult;
 import org.ligson.ichat.vo.RegisterDTO;
 import org.ligson.ichat.vo.WebResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,9 +68,10 @@ public class UserServiceImpl implements UserService {
             Map<Object, Object> userTokensMap = stringRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).entries();
             int count = userTokensMap == null ? 0 : userTokensMap.values().size();
             if (count > 30) {
-                webResult.setSuccess(false);
-                webResult.setErrorMsg("最多可以使用两个设备登录，可以退出之前登录后再试");
-                return webResult;
+                //webResult.setSuccess(false);
+                //webResult.setErrorMsg("最多可以使用两个设备登录，可以退出之前登录后再试");
+                //return webResult;
+                log.warn("最多可以使用两个设备登录，可以退出之前登录后再试");
             }
 
             if (vo.getPassword().equals(password)) {
@@ -133,6 +138,7 @@ public class UserServiceImpl implements UserService {
             user.setPassword(req.getPassword());
             user.setLevel(UserLevel.FREE);
             user.setTimes(5);
+            user.setUserType(UserType.NORMAL);
             userDao.insert(user);
             webResult.setSuccess(true);
             return webResult;
@@ -144,7 +150,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    public synchronized WebResult resetPassword(String username, String oldPassword, String newPassword) {
+    public synchronized WebResult modifyPassword(String username, String oldPassword, String newPassword) {
         WebResult webResult = new WebResult();
         if (StringUtils.isNotBlank(username) && StringUtils.isNotBlank(oldPassword) && StringUtils.isNotBlank(newPassword)) {
             Matcher passwordMatcher = PASSWORD_PATTERN.matcher(newPassword);
@@ -226,5 +232,56 @@ public class UserServiceImpl implements UserService {
     @Override
     public void fix() {
         userDao.fixUserData();
+    }
+
+    @Override
+    public PageWebResult<User> list(BasePageReq basePageReq) {
+        return userDao.list(basePageReq);
+    }
+
+    @Override
+    public WebResult resetPwd(ResetPwdReq req) {
+        WebResult webResult = new WebResult();
+        Matcher passwordMatcher = PASSWORD_PATTERN.matcher(req.getPassword());
+        if (!passwordMatcher.matches()) {
+            webResult.setErrorMsg("密码格式错误!");
+            return webResult;
+        }
+        User user = userDao.findById(req.getId());
+        user.setPassword(req.getPassword());
+        userDao.update(user);
+        webResult.setSuccess(true);
+        return webResult;
+    }
+
+    @Override
+    public WebResult modifyUserLevel(ModifyUserLevelReq req) {
+        User user = userDao.findById(req.getId());
+        user.setLevel(req.getLevel());
+        userDao.update(user);
+        return WebResult.newSuccessInstance();
+    }
+
+    @Override
+    public WebResult modifyUserType(ModifyUserTypeReq req) {
+        User user = userDao.findById(req.getId());
+        user.setUserType(req.getUserType());
+        userDao.update(user);
+        return WebResult.newSuccessInstance();
+    }
+
+    @Override
+    public WebResult modifyUserTimes(ModifyUserTimesReq req) {
+        User user = userDao.findById(req.getId());
+        user.setTimes(req.getTimes());
+        userDao.update(user);
+        return WebResult.newSuccessInstance();
+    }
+
+    @Override
+    public WebResult deleteUserReq(DeleteUserReq req) {
+        User user = userDao.findById(req.getId());
+        userDao.deleteByName(user.getName());
+        return WebResult.newSuccessInstance();
     }
 }
