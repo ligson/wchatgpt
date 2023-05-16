@@ -9,6 +9,7 @@ import org.ligson.ichat.admin.vo.*;
 import org.ligson.ichat.dao.UserDao;
 import org.ligson.ichat.domain.User;
 import org.ligson.ichat.enums.UserLevel;
+import org.ligson.ichat.service.CacheService;
 import org.ligson.ichat.enums.UserType;
 import org.ligson.ichat.serializer.CruxSerializer;
 import org.ligson.ichat.service.UserService;
@@ -19,11 +20,9 @@ import org.ligson.ichat.vo.WebResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,31 +41,18 @@ public class UserServiceImpl implements UserService {
     @Value("${app.server.register-code}")
     private String registerCode;
 
-    private final static String USER_SESSION_CONTEXT_PREFIX = "xchat:session-context:";
-    //已经登录用户
-
     @Autowired
-    private StringRedisTemplate stringRedisTemplate;
-    @Autowired
-    private CruxSerializer cruxSerializer;
+    private CacheService cacheService;
 
     public User getLoginUserByToken(String token) {
-        if (StringUtils.isBlank(token)) {
-            return null;
-        }
-        String userJson = stringRedisTemplate.boundValueOps(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token).get();
-        if (StringUtils.isNotBlank(userJson)) {
-            return cruxSerializer.deserialize(userJson, User.class);
-        }
-        return null;
+        return cacheService.getLoginUserByToken(token);
     }
 
     public WebResult login(String username, String password) {
         WebResult webResult = new WebResult();
-        User vo = userDao.findByName(username);
-        if (vo != null) {
-            Map<Object, Object> userTokensMap = stringRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).entries();
-            int count = userTokensMap == null ? 0 : userTokensMap.values().size();
+        User user = userDao.findByName(username);
+        if (user != null) {
+            int count = cacheService.getLoginUserTerminalCount(user.getId());
             if (count > 30) {
                 //webResult.setSuccess(false);
                 //webResult.setErrorMsg("最多可以使用两个设备登录，可以退出之前登录后再试");
@@ -74,9 +60,9 @@ public class UserServiceImpl implements UserService {
                 log.warn("最多可以使用两个设备登录，可以退出之前登录后再试");
             }
 
-            if (vo.getPassword().equals(password)) {
-                if (vo.getTimes() <= 0) {
-                    if (vo.getLevel() == UserLevel.FREE) {
+            if (user.getPassword().equals(password)) {
+                if (user.getTimes() <= 0) {
+                    if (user.getLevel() == UserLevel.FREE) {
                         webResult.setSuccess(false);
                         webResult.setErrorMsg("成本有限,免费用户只能体验20次，请联系管理员付费,请谅解");
                     } else {
@@ -85,14 +71,13 @@ public class UserServiceImpl implements UserService {
                     }
                     return webResult;
                 }
-                vo.setLastedLoginTime(new Date());
-                userDao.update(vo);
+                user.setLastedLoginTime(new Date());
+                userDao.update(user);
                 String token = UUID.randomUUID().toString();
                 webResult.setSuccess(true);
                 webResult.putData("username", username);
                 webResult.putData("token", token);
-                stringRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + vo.getId()).put(token, DateFormatUtils.format(new Date(), "yyyyMMddHHmmss"));
-                stringRedisTemplate.boundValueOps(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token).set(cruxSerializer.serialize(vo));
+                cacheService.setUserAndToken(token, user);
             } else {
                 webResult.setSuccess(false);
                 webResult.setErrorMsg("密码错误");
@@ -222,8 +207,7 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.isNotBlank(token)) {
             User user = getLoginUserByToken(token);
             if (user != null) {
-                stringRedisTemplate.boundHashOps(USER_SESSION_CONTEXT_PREFIX + ":user-tokens:" + user.getId()).delete(token);
-                stringRedisTemplate.delete(USER_SESSION_CONTEXT_PREFIX + ":token-user:" + token);
+                cacheService.relieveUserAndToken(token, user);
             }
         }
         return WebResult.newSuccessInstance();

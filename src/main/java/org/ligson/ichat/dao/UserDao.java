@@ -63,7 +63,7 @@ public class UserDao {
             ps.setString(1, user.getName());
             ps.setString(2, user.getPassword());
             ps.setInt(3, user.getLevel().getCode());
-            ps.setTimestamp(4, new Timestamp(new Date().getTime()));
+            ps.setTimestamp(4, user.getCreatedTime() != null ? new Timestamp(user.getCreatedTime().getTime()) : new Timestamp(new Date().getTime()));
             ps.setTimestamp(5, user.getLastedLoginTime() != null ? new Timestamp(user.getLastedLoginTime().getTime()) : null);
             ps.setInt(6, user.getTimes());
             ps.setInt(7, user.getUserType().getCode());
