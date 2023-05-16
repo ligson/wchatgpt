@@ -37,4 +37,6 @@ public interface UserService {
     WebResult modifyUserTimes(ModifyUserTimesReq req);
 
     WebResult deleteUserReq(DeleteUserReq req);
+
+    WebResult add(AddUserReq addUserReq);
 }

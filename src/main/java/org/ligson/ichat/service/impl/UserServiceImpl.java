@@ -4,14 +4,12 @@ package org.ligson.ichat.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.ligson.ichat.admin.vo.*;
 import org.ligson.ichat.dao.UserDao;
 import org.ligson.ichat.domain.User;
 import org.ligson.ichat.enums.UserLevel;
-import org.ligson.ichat.service.CacheService;
 import org.ligson.ichat.enums.UserType;
-import org.ligson.ichat.serializer.CruxSerializer;
+import org.ligson.ichat.service.CacheService;
 import org.ligson.ichat.service.UserService;
 import org.ligson.ichat.vo.BasePageReq;
 import org.ligson.ichat.vo.PageWebResult;
@@ -267,5 +265,13 @@ public class UserServiceImpl implements UserService {
         User user = userDao.findById(req.getId());
         userDao.deleteByName(user.getName());
         return WebResult.newSuccessInstance();
+    }
+
+    @Override
+    public WebResult add(AddUserReq req) {
+        RegisterDTO registerDTO = new RegisterDTO();
+        registerDTO.setUsername(req.getName());
+        registerDTO.setPassword(req.getPassword());
+        return registerUser(registerDTO);
     }
 }

@@ -45,9 +45,14 @@ public class UserMgrController {
         return userService.modifyUserTimes(req);
     }
 
-    @PostMapping("/modifyUserTimes")
+    @PostMapping("/delete")
     public WebResult deleteUserReq(@RequestBody DeleteUserReq req) {
         return userService.deleteUserReq(req);
+    }
+
+    @PostMapping("/add")
+    public WebResult add(@RequestBody AddUserReq addUserReq) {
+        return userService.add(addUserReq);
     }
 
 
