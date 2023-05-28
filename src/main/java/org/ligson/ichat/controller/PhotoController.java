@@ -37,9 +37,9 @@ public class PhotoController {
             multipartFile.transferTo(newFile);
             boolean watermark = true;
             if (watermark) {
-                return photoService.zuoTang(newFile.getAbsolutePath());
-            } else {
                 return photoService.qingTu(newFile.getAbsolutePath());
+            } else {
+                return photoService.zuoTang(newFile.getAbsolutePath());
             }
         } catch (Exception e) {
             e.printStackTrace();
