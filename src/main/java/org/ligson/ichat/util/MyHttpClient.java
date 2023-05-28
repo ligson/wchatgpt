@@ -119,4 +119,7 @@ public class MyHttpClient {
         return null;
     }
 
+    public CloseableHttpClient getHttpClient() {
+        return httpClient;
+    }
 }
