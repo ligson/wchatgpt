@@ -65,6 +65,8 @@ public class GenerateImageService {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
         String token = Optional.ofNullable(imageTokenCache.get("token")).orElse(getToken());
+        headers.add("X-Validation-Token", token);
+        headers.add("X-App-Version", "WEB-2.0.0");
         headers.add("Authorization", "Bearer " + token);
         PromptInfo promptInfo = new PromptInfo();
         promptInfo.setPrompt(prompt);
@@ -103,5 +105,11 @@ public class GenerateImageService {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<DrawResult> res = restTemplate.exchange(url, HttpMethod.GET, httpEntity, DrawResult.class);
         return res.getBody();
+    }
+
+
+    public static void main(String[] args) {
+        String s = new GenerateImageService().doImageGenerate("海洋");
+        System.out.println(s);
     }
 }
