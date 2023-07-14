@@ -1,19 +1,19 @@
 package org.ligson.ichat.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.ligson.ichat.domain.User;
+import org.ligson.ichat.user.User;
 import org.ligson.ichat.openai.vo.req.ChatCompletionsReq;
 import org.ligson.ichat.openai.vo.req.Message;
 import org.ligson.ichat.service.impl.OpenAIChatServiceImpl;
-import org.ligson.ichat.service.UserService;
-import org.ligson.ichat.vo.WebResult;
+import org.ligson.ichat.user.UserService;
+import org.ligson.ichat.fw.simplecrud.vo.WebResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;

@@ -5,7 +5,7 @@ import cn.hutool.captcha.LineCaptcha;
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
 import org.ligson.ichat.service.CaptchaService;
-import org.ligson.ichat.vo.WebResult;
+import org.ligson.ichat.fw.simplecrud.vo.WebResult;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

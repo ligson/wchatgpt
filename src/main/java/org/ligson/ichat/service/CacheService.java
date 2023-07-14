@@ -1,6 +1,6 @@
 package org.ligson.ichat.service;
 
-import org.ligson.ichat.domain.User;
+import org.ligson.ichat.user.User;
 
 public interface CacheService {
 

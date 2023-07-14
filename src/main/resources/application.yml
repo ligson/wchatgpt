@@ -28,6 +28,19 @@ spring:
       static-locations: classpath:/static/,classpath:/resources/,file:${app.openai.img-dir}
   mvc:
     dispatch-options-request: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: true
+    properties:
+      hibernate:
+        format_sql: false
+        type:
+          descriptor:
+            sql:
+              log: true
   datasource:
     hikari:
       jdbc-url: ${app.db.url}
@@ -39,8 +52,13 @@ spring:
     url: ${app.db.url}
     username: ${app.db.username}
     password: ${app.db.password}
-  redis:
-    host: ${app.redis.host}
-    port: ${app.redis.port}
-    password: ${app.redis.password}
-
+  data:
+    redis:
+      host: ${app.redis.host}
+      port: ${app.redis.port}
+      password: ${app.redis.password}
+logging:
+  level:
+    org.ligson: debug
+    org.hibernate.sql: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace

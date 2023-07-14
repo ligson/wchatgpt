@@ -1,10 +1,11 @@
 package org.ligson.ichat.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.ligson.ichat.domain.User;
-import org.ligson.ichat.ex.InnerException;
+import org.ligson.ichat.fw.simplecrud.vo.WebResult;
+import org.ligson.ichat.user.User;
+import org.ligson.ichat.fw.ex.InnerException;
 import org.ligson.ichat.service.CaptchaService;
-import org.ligson.ichat.service.UserService;
+import org.ligson.ichat.user.UserService;
 import org.ligson.ichat.vo.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

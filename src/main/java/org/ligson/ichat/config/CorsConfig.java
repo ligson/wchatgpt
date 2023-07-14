@@ -1,6 +1,6 @@
 package org.ligson.ichat.config;
 
-import org.ligson.ichat.filter.FilterOrder;
+import org.ligson.ichat.fw.filter.FilterOrder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;

@@ -1,8 +1,8 @@
 package org.ligson.ichat.photo.zuotang;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.ligson.ichat.util.MyHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

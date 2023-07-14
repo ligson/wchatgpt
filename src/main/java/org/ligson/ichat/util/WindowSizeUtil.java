@@ -1,6 +1,6 @@
 package org.ligson.ichat.util;
 
-import org.ligson.ichat.context.SessionContext;
+import org.ligson.ichat.fw.context.SessionContext;
 import org.ligson.ichat.domain.WindowSize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

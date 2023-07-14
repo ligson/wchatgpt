@@ -2,7 +2,6 @@ package org.ligson.ichat.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.ligson.ichat.service.VoiceService;
-import org.ligson.ichat.vo.WebResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;

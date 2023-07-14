@@ -1,7 +1,7 @@
 package org.ligson.ichat.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.ligson.ichat.domain.User;
+import org.ligson.ichat.user.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;

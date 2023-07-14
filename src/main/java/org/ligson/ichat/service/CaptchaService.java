@@ -1,6 +1,6 @@
 package org.ligson.ichat.service;
 
-import org.ligson.ichat.vo.WebResult;
+import org.ligson.ichat.fw.simplecrud.vo.WebResult;
 
 public interface CaptchaService {
 

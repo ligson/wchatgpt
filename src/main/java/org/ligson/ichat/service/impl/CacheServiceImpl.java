@@ -2,8 +2,8 @@ package org.ligson.ichat.service.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.ligson.ichat.domain.User;
-import org.ligson.ichat.serializer.CruxSerializer;
+import org.ligson.ichat.user.User;
+import org.ligson.ichat.fw.serializer.CruxSerializer;
 import org.ligson.ichat.service.CacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;

@@ -1,11 +1,11 @@
 package org.ligson.ichat.admin.controller;
 
 import org.ligson.ichat.admin.vo.*;
-import org.ligson.ichat.domain.User;
-import org.ligson.ichat.service.UserService;
-import org.ligson.ichat.vo.BasePageReq;
-import org.ligson.ichat.vo.PageWebResult;
-import org.ligson.ichat.vo.WebResult;
+import org.ligson.ichat.user.User;
+import org.ligson.ichat.user.UserService;
+import org.ligson.ichat.fw.simplecrud.vo.BasePageReq;
+import org.ligson.ichat.fw.simplecrud.vo.PageWebResult;
+import org.ligson.ichat.fw.simplecrud.vo.WebResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

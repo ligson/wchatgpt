@@ -1,21 +1,20 @@
 package org.ligson.ichat.interceptor;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.ligson.ichat.context.SessionContext;
-import org.ligson.ichat.domain.User;
+import org.ligson.ichat.fw.context.SessionContext;
+import org.ligson.ichat.user.User;
 import org.ligson.ichat.domain.WindowSize;
 import org.ligson.ichat.enums.UserType;
-import org.ligson.ichat.serializer.CruxSerializer;
-import org.ligson.ichat.service.UserService;
-import org.ligson.ichat.vo.WebResult;
+import org.ligson.ichat.fw.serializer.CruxSerializer;
+import org.ligson.ichat.user.UserService;
+import org.ligson.ichat.fw.simplecrud.vo.WebResult;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 

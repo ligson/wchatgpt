@@ -2,18 +2,17 @@ package org.ligson.ichat.openai;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.client5.http.entity.mime.FileBody;
 import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.message.BasicHeader;
-import org.ligson.ichat.ex.InnerException;
+import org.ligson.ichat.fw.ex.InnerException;
 import org.ligson.ichat.openai.vo.req.ImgGenReq;
 import org.ligson.ichat.openai.vo.res.AudioTranscriptionsRes;
 import org.ligson.ichat.openai.vo.res.CompletionsRes;
-import org.ligson.ichat.serializer.CruxSerializer;
+import org.ligson.ichat.fw.serializer.CruxSerializer;
 import org.ligson.ichat.openai.vo.ModelResult;
 import org.ligson.ichat.openai.vo.req.ChatCompletionsReq;
 import org.ligson.ichat.openai.vo.req.CompletionsReq;
@@ -22,8 +21,6 @@ import org.ligson.ichat.openai.vo.res.ImgGenRes;
 import org.ligson.ichat.util.MyHttpClient;
 
 import java.io.File;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Slf4j
