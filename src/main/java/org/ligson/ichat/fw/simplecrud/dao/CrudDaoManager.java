@@ -3,6 +3,7 @@ package org.ligson.ichat.fw.simplecrud.dao;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.ligson.ichat.chatlog.ChatLog;
 import org.ligson.ichat.fw.ex.InnerException;
 import org.ligson.ichat.fw.simplecrud.domain.BaseEntity;
 import org.ligson.ichat.fw.simplecrud.service.CrudService;
@@ -31,6 +32,7 @@ public class CrudDaoManager {
         log.debug("扫描到继承BaseEntity的模型{}个,分别是:{}", entityClazzMap.size(), entityClazzMap.keySet());
         if (entityClazzMap.size() == 0) {
             entityClazzMap.put(User.class.getSimpleName().toUpperCase(), User.class);
+            entityClazzMap.put(ChatLog.class.getSimpleName().toUpperCase(), ChatLog.class);
         }
     }
 
