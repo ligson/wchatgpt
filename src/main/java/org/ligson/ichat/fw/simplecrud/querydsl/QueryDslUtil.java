@@ -28,13 +28,11 @@ import org.springframework.util.ReflectionUtils;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
+@SuppressWarnings("unchecked")
 public class QueryDslUtil {
     private static QuerydslBindingsFactory bindingsFactory;
     private static ConversionService conversionService;
@@ -48,7 +46,7 @@ public class QueryDslUtil {
         if (null != queryCondition) {
             TypeInformation<?> typeInformation = TypeInformation.of(entityClazz);
             for (QueryField queryField : queryCondition.getQueryFields()) {
-                Class<?> fieldType = getPath(queryField.getName(), typeInformation).getType();
+                Class<?> fieldType = Objects.requireNonNull(getPath(queryField.getName(), typeInformation)).getType();
                 Object fieldValue = conversionService.convert(queryField.getValue(), fieldType);
                 if (queryField.getOperator() == QueryOperator.EQ) {
                     predicate.and(entityPath.get(queryField.getName()).eq(fieldValue));
@@ -80,8 +78,14 @@ public class QueryDslUtil {
     public static Predicate getInPartition(String ids, String entityName, String fieldName) {
         String[] idLongList = ids.split(",");
         CrudDaoManager gpm = ServiceLocator.getBean(CrudDaoManager.class);
-        Class<?> entityClz = gpm.entityType(entityName);
-        PropertyDescriptor pd = BeanUtils.getPropertyDescriptor(entityClz, fieldName);
+        Class<?> entityClz = null;
+        if (gpm != null) {
+            entityClz = gpm.entityType(entityName);
+        }
+        PropertyDescriptor pd = null;
+        if (entityClz != null) {
+            pd = BeanUtils.getPropertyDescriptor(entityClz, fieldName);
+        }
         if (pd == null) {
             throw new InnerException(String.format("实体上:%s没有属性:%s", entityName, fieldName));
         }
@@ -113,7 +117,10 @@ public class QueryDslUtil {
         BooleanBuilder booleanBuilder = new BooleanBuilder();
         List<List<String>> partition = Lists.partition(ids, EXP_MAX_SIZE);
         CrudDaoManager gpm = ServiceLocator.getBean(CrudDaoManager.class);
-        Class<?> domainType = gpm.entityType(entityName);
+        Class<?> domainType = null;
+        if (gpm != null) {
+            domainType = gpm.entityType(entityName);
+        }
         TypeInformation<?> typeInformation = TypeInformation.of(domainType);
         for (List<String> idsList : partition) {
             createExtraPredicate(convertStringToExpressStr(idsList, fieldName), typeInformation).ifPresent(booleanBuilder::or);

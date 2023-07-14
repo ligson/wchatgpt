@@ -7,8 +7,8 @@ import org.ligson.ichat.fw.ex.InnerException;
 import org.ligson.ichat.fw.simplecrud.domain.BaseEntity;
 import org.ligson.ichat.fw.simplecrud.service.CrudService;
 import org.ligson.ichat.fw.util.ServiceLocator;
+import org.ligson.ichat.user.User;
 import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -25,9 +25,13 @@ public class CrudDaoManager {
 
     @PostConstruct
     public void init() {
-        Reflections reflections = new Reflections("org.xassn", SubTypesScanner.class);
+        Reflections reflections = new Reflections("org.ligson");
+        log.debug("store size:{}", reflections.getStore().size());
         reflections.getSubTypesOf(BaseEntity.class).forEach(entityType -> entityClazzMap.put(entityType.getSimpleName().toUpperCase(), entityType));
-        log.debug("扫描到继承BaseEntity的模型{}个", entityClazzMap.size());
+        log.debug("扫描到继承BaseEntity的模型{}个,分别是:{}", entityClazzMap.size(), entityClazzMap.keySet());
+        if (entityClazzMap.size() == 0) {
+            entityClazzMap.put(User.class.getSimpleName().toUpperCase(), User.class);
+        }
     }
 
     @SuppressWarnings("unchecked")
