@@ -4,12 +4,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.ligson.ichat.user.User;
+import org.ligson.ichat.fw.simplecrud.vo.WebResult;
 import org.ligson.ichat.openai.vo.req.ChatCompletionsReq;
 import org.ligson.ichat.openai.vo.req.Message;
 import org.ligson.ichat.service.impl.OpenAIChatServiceImpl;
+import org.ligson.ichat.user.User;
 import org.ligson.ichat.user.UserService;
-import org.ligson.ichat.fw.simplecrud.vo.WebResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -59,7 +59,8 @@ public class OpenAiController {
         }
         user.setTimes(user.getTimes() - 1);
 
-        String msg = openAIChatService.chat(completionsReq);
+        String msg = openAIChatService.chat(completionsReq, user.getId());
+        userService.update(user);
         if (msg != null) {
             webResult.setSuccess(true);
             webResult.putData("msg", msg);

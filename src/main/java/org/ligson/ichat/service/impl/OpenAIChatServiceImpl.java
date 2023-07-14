@@ -2,7 +2,10 @@ package org.ligson.ichat.service.impl;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.ligson.ichat.chatlog.ChatLog;
+import org.ligson.ichat.chatlog.ChatLogService;
 import org.ligson.ichat.fw.serializer.CruxSerializer;
 import org.ligson.ichat.fw.simplecrud.vo.WebResult;
 import org.ligson.ichat.images.GenerateImageService;
@@ -42,6 +45,8 @@ public class OpenAIChatServiceImpl implements ChatService {
     private GenerateImageService imageService;
     @Autowired
     private WindowSizeUtil windowSizeUtil;
+    @Autowired
+    private ChatLogService chatLogService;
 
     public OpenAIChatServiceImpl() {
         log.debug("---");
@@ -72,12 +77,30 @@ public class OpenAIChatServiceImpl implements ChatService {
         return null;
     }
 
-    public String chat(ChatCompletionsReq completionsReq) {
+    public String chat(ChatCompletionsReq completionsReq, String userId) {
         List<Message> messages = completionsReq.getMessages();
         if (messages.isEmpty()) {
             return null;
         }
-        return chatTxt(completionsReq);
+
+        String msg = null;
+        long startTime = System.currentTimeMillis();
+        try {
+            msg = chatTxt(completionsReq);
+        } finally {
+            if (StringUtils.isNotBlank(msg) && CollectionUtils.isNotEmpty(completionsReq.getMessages())) {
+                String prompt = completionsReq.getMessages().get(completionsReq.getMessages().size() - 1).getContent();
+                if (StringUtils.isNotBlank(prompt)) {
+                    ChatLog chatLog = new ChatLog();
+                    chatLog.setPrompt(prompt);
+                    chatLog.setAsk(msg);
+                    chatLog.setTotalTime(System.currentTimeMillis() - startTime);
+                    chatLog.setUserId(userId);
+                    chatLogService.save(chatLog);
+                }
+            }
+        }
+        return msg;
     }
 
     public String img(String contextId, String question) {
