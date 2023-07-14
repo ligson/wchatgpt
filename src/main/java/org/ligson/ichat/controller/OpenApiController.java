@@ -31,8 +31,8 @@ public class OpenApiController {
 
     @PostMapping("/chat")
     public WebResult chat(@RequestBody ChatCompletionsReq completionsReq) {
-        String msg = openAIChatService.chat(completionsReq);
-        return WebResult.newSuccessInstance().putData("msg", msg);
+        //String msg = openAIChatService.chat(completionsReq);
+        return WebResult.newSuccessInstance().putData("msg", null);
     }
 
     @PostMapping("/img")
