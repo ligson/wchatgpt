@@ -52,13 +52,13 @@ public class OpenAiController {
                 return webResult;
             }
         }
+        user = userService.findById(user.getId(), User.class);
         if (user.getTimes() <= 0) {
             webResult.setSuccess(false);
             webResult.setErrorMsg("您的使用次数已经用完，请联系管理员续费!");
             return webResult;
         }
         user.setTimes(user.getTimes() - 1);
-
         String msg = openAIChatService.chat(completionsReq, user.getId());
         userService.update(user);
         if (msg != null) {

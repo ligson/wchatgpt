@@ -21,25 +21,25 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class User extends BaseEntity {
-    @Column
+    @Column(nullable = false,unique = true)
     @Comment("名称")
     private String name;
-    @Column
+    @Column(nullable = false)
     @Comment("密码")
     @JsonIgnore
     private String password;
-    @Column
+    @Column(nullable = false)
     @Comment("用户级别:1、免费;2、收费")
     @Enumerated(value = EnumType.STRING)
     private UserLevel level;
     @Column
     @Comment("上次登录时间")
     private Date lastedLoginTime;
-    @Column
+    @Column(nullable = false)
     @Comment("接口剩余次数")
     private Integer times;
 
-    @Column
+    @Column(nullable = false)
     @Comment("用户类型:1.普通用户,100.管理员")
     @Enumerated(value = EnumType.STRING)
     private UserType userType;
