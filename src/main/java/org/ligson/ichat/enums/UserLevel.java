@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum UserLevel {
-    FREE(1, "免费"), FOREVER(2, "永久");
+    FREE(1, "免费"), FOREVER(2, "永久"), GPT4(3, "gpt4");
     private final int code;
     private final String msg;
 

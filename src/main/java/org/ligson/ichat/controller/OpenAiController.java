@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.ligson.ichat.enums.UserLevel;
 import org.ligson.ichat.fw.simplecrud.vo.WebResult;
 import org.ligson.ichat.openai.vo.req.ChatCompletionsReq;
 import org.ligson.ichat.openai.vo.req.Message;
@@ -59,6 +60,9 @@ public class OpenAiController {
             return webResult;
         }
         user.setTimes(user.getTimes() - 1);
+        if (user.getLevel() == UserLevel.GPT4) {
+            completionsReq.setModel("gpt-4-0613");
+        }
         String msg = openAIChatService.chat(completionsReq, user.getId());
         userService.update(user);
         if (msg != null) {
